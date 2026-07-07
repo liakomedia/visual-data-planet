@@ -256,13 +256,17 @@ function buildDisasters(){
   }
 }
 function buildClimate(){
-  if(typeof CLIMATE==='undefined') return;
-  const idxs=[],pos=[],col=[],c=new THREE.Color();
-  CLIMATE.forEach((pt,i)=>{ idxs.push(i); const v=llToVec(pt[0],pt[1],terrainR(pt[0],pt[1],R*0)); pos.push(v[0],v[1],v[2]);
-    c.set(CLIM_G[koppenGroup(pt[2])]); col.push(c.r,c.g,c.b); });
-  const pts=ptsHiddenVC(pos,col,3.2,0.72);
-  _clouds.push({pts,label:'Koppen climate zones (A/B/C/D/E)',idxs,kind:'climate',data:CLIMATE,grp:'climate',
-    sw:'<span class="sw" style="background:linear-gradient(90deg,#ff5a4d,#5a9bff)"></span>'});
+  // Köppen climate as a continuous filled SURFACE — a terrain-conforming translucent shell
+  // textured with the classification colours (ocean pixels are transparent).
+  const t=tex('climate_koppen.png');
+  const relief=tex('earth_relief_4k.jpg'); if('colorSpace' in relief) relief.colorSpace=THREE.NoColorSpace;
+  const mat=new THREE.MeshPhongMaterial({map:t, transparent:true, opacity:0.55, depthWrite:false,
+    displacementMap:relief, displacementScale:DISP, displacementBias:-DISP*0.5+R*0.0015,
+    shininess:0});
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(R,384,192), mat);
+  mesh.frustumCulled=false; earthGroup.add(mesh);
+  _lines.push({obj:mesh, label:'Köppen climate zones (A·B·C·D·E)', grp:'climate',
+    sw:'<span class="sw" style="background:linear-gradient(90deg,#ff5a4d,#f2c14e,#5ec26a,#5a9bff)"></span>'});
 }
 
 const DISP=R*0.05;              // full land+ocean vertical exaggeration (real relief is <0.3% of R)

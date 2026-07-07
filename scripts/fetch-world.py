@@ -85,7 +85,7 @@ for ev in eo.get('events', []):
     if g.get('type') != 'Point' or not g.get('coordinates'): continue
     EONET.append([r2(g['coordinates'][1]), r2(g['coordinates'][0]), ci, (ev.get('title') or '')[:48]])
 
-# CLIMATE (Köppen)
+# CLIMATE (Köppen) — rendered as a filled SURFACE, so we bake a colour texture (not points).
 KOPPEN = ['', 'Af','Am','Aw','BWh','BWk','BSh','BSk','Csa','Csb','Csc','Cwa','Cwb','Cwc','Cfa','Cfb','Cfc',
           'Dsa','Dsb','Dsc','Dsd','Dwa','Dwb','Dwc','Dwd','Dfa','Dfb','Dfc','Dfd','ET','EF']
 zf = tempfile.mktemp(suffix='.zip'); open(zf, 'wb').write(get('https://ndownloader.figshare.com/files/12407516', 400))
@@ -93,26 +93,26 @@ with zipfile.ZipFile(zf) as z:
     z.extract('Beck_KG_V1_present_0p083.tif', tempfile.gettempdir())
 os.unlink(zf)
 tif = os.path.join(tempfile.gettempdir(), 'Beck_KG_V1_present_0p083.tif')
-W, H = 360, 180
 with rasterio.open(tif) as ds:
-    a = ds.read(1, out_shape=(H, W), resampling=Resampling.nearest)
+    a = ds.read(1)               # 4320x2160, classes 0 (ocean) .. 30
 os.unlink(tif)
-CLIMATE = []
-for j in range(H):
-    lat = 90 - (j + 0.5) / H * 180
-    for i in range(W):
-        k = int(a[j, i])
-        if 1 <= k <= 30:
-            CLIMATE.append([round(lat, 1), round(-180 + (i + 0.5) / W * 360, 1), k])
+from PIL import Image
+GC = {0: (255,90,77), 1: (242,193,78), 2: (94,194,106), 3: (90,155,255), 4: (207,232,255)}  # A,B,C,D,E
+gid = np.select([(a>=1)&(a<=3),(a>=4)&(a<=7),(a>=8)&(a<=16),(a>=17)&(a<=28),(a>=29)&(a<=30)],
+                [0,1,2,3,4], default=-1)
+rgba = np.zeros((a.shape[0], a.shape[1], 4), np.uint8)
+for g,(r,gg,bb) in GC.items():
+    m = gid == g; rgba[m,0]=r; rgba[m,1]=gg; rgba[m,2]=bb; rgba[m,3]=255   # land opaque, ocean transparent
+Image.fromarray(rgba).resize((2048,1024), Image.NEAREST).save('includes/images/tex/climate_koppen.png')
 
 open('includes/js/planet-world.js', 'w').write(
     '/* Open world-data layers. POLITICAL/LOGISTICS: Natural Earth + OurAirports (public domain).\n'
-    '   DISASTERS: USGS quakes + NASA EONET (snapshot at build time). CLIMATE: Köppen-Geiger,\n'
-    '   Beck et al. (2018), CC BY 4.0. */\n'
+    '   DISASTERS: USGS quakes + NASA EONET (snapshot at build time). CLIMATE surface texture\n'
+    '   (climate_koppen.png) baked here from Köppen-Geiger, Beck et al. (2018), CC BY 4.0. */\n'
     'const BORDERS=' + json.dumps(BORDERS) + ';\nconst CAPITALS=' + json.dumps(CAPITALS) + ';\n'
     'const AIRPORTS=' + json.dumps(AIRPORTS) + ';\nconst QUAKES=' + json.dumps(QUAKES) + ';\n'
     'const EONET_CATS=' + json.dumps(ECAT) + ';\nconst EONET=' + json.dumps(EONET) + ';\n'
     'const QUAKES_HIST=' + json.dumps(QUAKES_HIST) + ';\n'
-    'const KOPPEN=' + json.dumps(KOPPEN) + ';\nconst CLIMATE=' + json.dumps(CLIMATE) + ';\n')
-print('wrote includes/js/planet-world.js: %d borders, %d capitals, %d airports, %d recent + %d historical quakes, %d events, %d climate' %
-      (len(BORDERS), len(CAPITALS), len(AIRPORTS), len(QUAKES), len(QUAKES_HIST), len(EONET), len(CLIMATE)))
+    'const KOPPEN=' + json.dumps(KOPPEN) + ';\n')
+print('wrote planet-world.js + climate_koppen.png: %d borders, %d capitals, %d airports, %d recent + %d historical quakes, %d events' %
+      (len(BORDERS), len(CAPITALS), len(AIRPORTS), len(QUAKES), len(QUAKES_HIST), len(EONET)))
