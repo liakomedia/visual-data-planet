@@ -58,6 +58,20 @@ QUAKES = []
 for f in q['features']:
     c = f['geometry']['coordinates']; pr = f['properties']
     QUAKES.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), (pr.get('place') or '')[:50], round(c[2] or 0)])
+# historical: all M5.0+ since 2000 (FDSN caps 20k/request → paginate by offset)
+import datetime
+QUAKES_HIST, off = [], 1
+while True:
+    d = json.loads(get('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson'
+                       '&starttime=2000-01-01&minmagnitude=5&orderby=time&limit=20000&offset=%d' % off, 240))
+    feats = d.get('features', [])
+    for f in feats:
+        c = f['geometry']['coordinates']; pr = f['properties']
+        if c[0] is None or c[1] is None: continue
+        yr = datetime.datetime.utcfromtimestamp((pr.get('time') or 0) / 1000).year
+        QUAKES_HIST.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), yr, round(c[2] or 0)])
+    if len(feats) < 20000: break
+    off += 20000
 ECAT = ['Wildfires', 'Severe Storms', 'Volcanoes', 'Sea and Lake Ice', 'Floods', 'Earthquakes', 'Drought',
         'Dust and Haze', 'Landslides', 'Snow', 'Temperature Extremes', 'Water Color', 'Manmade']
 eo = json.loads(get('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=800'))
@@ -98,6 +112,7 @@ open('includes/js/planet-world.js', 'w').write(
     'const BORDERS=' + json.dumps(BORDERS) + ';\nconst CAPITALS=' + json.dumps(CAPITALS) + ';\n'
     'const AIRPORTS=' + json.dumps(AIRPORTS) + ';\nconst QUAKES=' + json.dumps(QUAKES) + ';\n'
     'const EONET_CATS=' + json.dumps(ECAT) + ';\nconst EONET=' + json.dumps(EONET) + ';\n'
+    'const QUAKES_HIST=' + json.dumps(QUAKES_HIST) + ';\n'
     'const KOPPEN=' + json.dumps(KOPPEN) + ';\nconst CLIMATE=' + json.dumps(CLIMATE) + ';\n')
-print('wrote includes/js/planet-world.js: %d borders, %d capitals, %d airports, %d quakes, %d events, %d climate' %
-      (len(BORDERS), len(CAPITALS), len(AIRPORTS), len(QUAKES), len(EONET), len(CLIMATE)))
+print('wrote includes/js/planet-world.js: %d borders, %d capitals, %d airports, %d recent + %d historical quakes, %d events, %d climate' %
+      (len(BORDERS), len(CAPITALS), len(AIRPORTS), len(QUAKES), len(QUAKES_HIST), len(EONET), len(CLIMATE)))

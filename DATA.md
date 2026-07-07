@@ -18,7 +18,7 @@ Earth mapped in 3D from open datasets — conservation, life, geography and the 
 
 | Country borders & capitals (POLITICAL) | `includes/js/planet-world.js` (rebuild: `scripts/fetch-world.py`) | [Natural Earth 10m](https://www.naturalearthdata.com) | **Public domain** |
 | Airports — large & medium (LOGISTICS) | `includes/js/planet-world.js` | [OurAirports](https://ourairports.com/data/) | **Public domain** |
-| Earthquakes M4.5+ / natural events (DISASTERS) | `includes/js/planet-world.js` | [USGS earthquake feeds](https://earthquake.usgs.gov/earthquakes/feed/) · [NASA EONET](https://eonet.gsfc.nasa.gov) | Public domain (US Gov) — snapshot at build time |
+| Earthquakes — M4.5+ past 30 days **and M5.0+ since 2000** (47k) / natural events (DISASTERS) | `includes/js/planet-world.js` | [USGS FDSN event API](https://earthquake.usgs.gov/fdsnws/event/1/) · [NASA EONET](https://eonet.gsfc.nasa.gov) | Public domain (US Gov) — snapshot at build time |
 | Köppen-Geiger climate zones (CLIMATE) | `includes/js/planet-world.js` | Beck et al. (2018), *Nature Scientific Data*, [figshare 6396959](https://doi.org/10.1038/sdata.2018.214) | **CC BY 4.0** |
 | Public APIs by host location (13 sections) | `includes/js/planet-apis.js` (rebuild: `scripts/fetch-apis.py`) | [public-apis](https://github.com/public-apis/public-apis) (MIT); server geolocation [ip-api.com](https://ip-api.com) | MIT (list) · ip-api free tier (non-commercial) |
 

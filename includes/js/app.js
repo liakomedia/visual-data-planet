@@ -222,6 +222,14 @@ function buildDisasters(){
     _clouds.push({pts,label:'earthquakes M4.5+ · past 30 days',idxs,kind:'quake',data:QUAKES,grp:'disasters',
       sw:'<span class="sw" style="background:#ff5a2c;border-radius:50%"></span>'});
   }
+  if(typeof QUAKES_HIST!=='undefined'){
+    const idxs=[],pos=[],col=[],c=new THREE.Color();
+    QUAKES_HIST.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],R*1.03); pos.push(v[0],v[1],v[2]);
+      const t=Math.min(1,Math.max(0,(qk[2]-5)/3.5)); c.setHSL(0.12-0.12*t,0.95,0.5); col.push(c.r,c.g,c.b); });
+    const pts=ptsHiddenVC(pos,col,2.8,0.85);
+    _clouds.push({pts,label:'earthquakes M5+ · since 2000',idxs,kind:'quakeh',data:QUAKES_HIST,grp:'disasters',
+      sw:'<span class="sw" style="background:#ffb03a;border-radius:50%"></span>'});
+  }
   if(typeof EONET!=='undefined'){
     const idxs=[],pos=[]; EONET.forEach((e,i)=>{ idxs.push(i); const v=llToVec(e[0],e[1],R*1.042); pos.push(v[0],v[1],v[2]); });
     const pts=ptsHidden(pos,0xffa640,4.2,0.95);
@@ -359,6 +367,9 @@ function showSite(hit){
   else if(kind==='quake'){ tag='Earthquake - USGS'; col='#ff5a2c'; h2='Magnitude '+it[2];
     rows=row('Location',it[3]||'-')+row('Depth',it[4]+' km');
     note='USGS - earthquakes M4.5+ over the past 30 days.'; }
+  else if(kind==='quakeh'){ tag='Earthquake - USGS'; col='#ffb03a'; h2='Magnitude '+it[2];
+    rows=row('Year',it[3])+row('Depth',it[4]+' km');
+    note='USGS - M5.0+ earthquakes since 2000. Colour = magnitude.'; }
   else if(kind==='eonet'){ tag='Natural event - '+(EONET_CATS[it[2]]||''); col='#ffa640'; h2=it[3]||'Event';
     rows=row('Category',EONET_CATS[it[2]]||'-');
     note='Open natural event - NASA EONET (Earth Observatory Natural Event Tracker).'; }
