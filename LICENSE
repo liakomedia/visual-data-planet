@@ -30,8 +30,9 @@ SCOPE. This licence covers the CODE in this repository only. It does NOT cover:
    repository. Regenerate it locally with scripts/fetch-wdpa.mjs and follow the
    citation and terms at https://www.protectedplanet.net/en/legal.
 
-2. Earth imagery (includes/images/): Solar System Scope day-map texture (CC BY 4.0) and a
-   NASA-derived global elevation map (earth_topo.jpg, public domain). The earth-layers and
+2. Earth imagery (includes/images/): NASA Blue Marble: Next Generation topography & bathymetry
+   surface (earth_bathy_8k.jpg) and a NOAA ETOPO-derived relief map (earth_relief.jpg), both
+   public domain. The earth-layers and
    maritime files (includes/js/planet-earth.js, planet-maritime.js) are built from Natural
    Earth (public domain) and Wikidata (CC0). The fungal-hotspots file (planet-fungi.js) is
    derived from the SPUN Underground Atlas (Van Nuland et al. 2025, Nature; Zenodo

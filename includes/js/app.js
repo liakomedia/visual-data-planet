@@ -156,16 +156,18 @@ function buildMaritime(){
     addLine(polysToSegments(MBOUNDS, R*1.006), 0xcbb3ff, 0.6, 'maritime boundaries', '#cbb3ff');
 }
 
-const DISP=R*0.03;   // vertical exaggeration of the terrain (real relief is <0.2% of R — invisible without it)
+/* ETOPO combined relief: grey 0.5 = sea level, brighter = land, darker = ocean floor.
+   displacementBias re-zeros sea level to R, so land rises and the sea floor sinks. */
+const DISP=R*0.05;              // full land+ocean vertical exaggeration (real relief is <0.3% of R)
 function earthMesh(){
   earthGroup=new THREE.Group();
-  const topo=tex('earth_topo.jpg');
-  if('colorSpace' in topo) topo.colorSpace=THREE.NoColorSpace;   // heightmap is data, not colour
-  const sph=new THREE.Mesh(new THREE.SphereGeometry(R,320,160),
-    new THREE.MeshPhongMaterial({map:tex('8k_earth_daymap.jpg'),
-      displacementMap:topo, displacementScale:DISP,        // real 3D relief lifts the mountains off the sphere
-      bumpMap:topo, bumpScale:14,                          // fine shading so ranges read even head-on
-      shininess:2, specular:0x101418}));
+  const relief=tex('earth_relief.jpg');
+  if('colorSpace' in relief) relief.colorSpace=THREE.NoColorSpace;   // heightmap is data, not colour
+  const sph=new THREE.Mesh(new THREE.SphereGeometry(R,512,256),      // dense enough to resolve ridges & trenches
+    new THREE.MeshPhongMaterial({map:tex('earth_bathy_8k.jpg'),       // NASA Blue Marble w/ bathymetry — ocean shaded by depth
+      displacementMap:relief, displacementScale:DISP, displacementBias:-DISP*0.5,   // 0.5 grey (sea level) → R
+      bumpMap:relief, bumpScale:9,                                    // shades undersea ridges & mountains
+      shininess:3, specular:0x0a1420}));
   sph.name='globe';
   earthGroup.add(sph);
   const halo=new THREE.Mesh(new THREE.SphereGeometry(R*1.06,48,32),

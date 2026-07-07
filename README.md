@@ -28,8 +28,10 @@ of the ~315,000-site database:
   **UNESCO World Heritage**, **Ramsar wetlands**, **UNESCO-MAB biospheres**
 - The **second Protected Planet database, WD-OECM** (7,524 Other Effective area-based
   Conservation Measures) as its own orange layer
-- **3D terrain** — the globe carries real shaded relief (elevation displacement), so mountain
-  ranges rise off the sphere
+- **3D terrain and sea floor** — the globe carries real shaded relief (ETOPO elevation
+  displacement) for **both land and ocean**: mountain ranges rise, and the sea floor drops
+  away into depth-shaded basins with mid-ocean ridges, seamount chains and trenches
+  (NASA Blue Marble bathymetry surface, so the oceans read by depth rather than flat blue)
 - **Mycorrhizal-fungi biodiversity hotspots** (15,496) from **SPUN**'s Underground Atlas —
   arbuscular (AM) and ectomycorrhizal (EcM) richness hotspots; over 90% lie *outside*
   protected areas

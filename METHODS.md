@@ -8,11 +8,16 @@ every approximation is disclosed here and honoured in the panels.
 
 ## 1. The globe
 
-One textured Earth (equirectangular 8k day map on a sphere, radius R) with **real 3D terrain**:
-a global elevation grayscale drives a vertex displacement so mountain ranges physically rise off
-the sphere, lit by a camera-following key light so the relief reads from any angle. The vertical
-scale is exaggerated (true relief is <0.2% of the radius and would be invisible) — a disclosed,
-purely visual amplification that does not affect any datum in the panels. A site's
+One textured Earth on a sphere of radius R, with **real 3D relief for both land and sea floor**.
+The colour is NASA's Blue Marble: Next Generation *with topography and bathymetry*, so the oceans
+are shaded by depth (bright continental shelves through to dark abyssal plains) instead of a flat
+blue. A combined **ETOPO** elevation grid (NOAA) is re-encoded to a grayscale where sea level
+(0 m) is mid-grey, land runs brighter and the sea floor darker; it drives a vertex displacement
+with `displacementBias` set so the mid-grey sea level sits exactly at R — land therefore rises and
+the sea floor sinks, revealing mid-ocean ridges, seamount chains and trenches in true position.
+A camera-following key light shades the relief from any angle. The vertical scale is exaggerated
+(true relief is <0.3% of the radius and would be invisible) — a disclosed, purely visual
+amplification that does not affect any datum in the panels. A site's
 latitude/longitude becomes a position on the sphere with the standard mapping that matches
 equirectangular UVs:
 
