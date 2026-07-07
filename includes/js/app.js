@@ -333,7 +333,9 @@ function row(l,v){return `<div class="row"><div class="lab">${l}</div><div class
 function fmtArea(a){ if(!a) return '—';
   if(a<1) return Math.round(a*100)+' ha';
   return a.toLocaleString(undefined,{maximumFractionDigits:a<100?1:0})+' km²'; }
+function stopSpin(){ _spin=false; const sb=document.getElementById('bSpin'); if(sb) sb.classList.remove('active'); }
 function showSite(hit){
+  stopSpin();                       // freeze the globe so selecting a dot never drifts the view
   const kind=hit.cl.kind||'pp';
   if(kind==='pp') return showPP(hit);
   const it=hit.cl.data[hit.cl.idxs[hit.i]]; if(!it) return; pph.style.display='none';
@@ -389,6 +391,7 @@ function showSite(hit){
   pbd.innerHTML=h; panel.classList.add('open');
 }
 function showPP(hit){
+  stopSpin();
   const s=PP[hit.cl.idxs[hit.i]]; if(!s) return; pph.style.display='none';
   const marine=s[3]===1, col=marine?'#7fb8e8':'#8fe3a8';
   let h=`<span class="tag" style="background:${col};color:#04121a;border-color:${col}">Protected area · ${PP_REALM[s[3]]||'—'}</span>`;
@@ -432,14 +435,13 @@ function easeCam(toPos,toTarget,ms){
   cancelAnimationFrame(_camAnim); _camAnim=requestAnimationFrame(run);
 }
 function flyToLL(lat,lon){
-  _spin=false;                                    // stop the globe so the target stays framed
-  const sb=document.getElementById('bSpin'); if(sb) sb.classList.remove('active');
+  stopSpin();                                     // stop the globe so the target stays framed
   const v=llToVec(lat,lon,1);
   // account for the globe's current rotation → world direction of the target point
   const rot=earthGroup.rotation.y, cos=Math.cos(rot), sin=Math.sin(rot);
   const x=v[0]*cos+v[2]*sin, y=v[1], z=-v[0]*sin+v[2]*cos;
   // zoom right in: camera just outside the point, looking AT the point (not the globe centre)
-  easeCam({x:x*R*1.55, y:y*R*1.55, z:z*R*1.55}, {x:x*R, y:y*R, z:z*R}, 950);
+  easeCam({x:x*R*1.24, y:y*R*1.24, z:z*R*1.24}, {x:x*R, y:y*R, z:z*R}, 950);   // close-in so the dots read large
 }
 document.getElementById('bAll').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
 document.getElementById('bFit').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
