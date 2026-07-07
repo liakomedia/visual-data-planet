@@ -15,7 +15,12 @@ blue. A combined **ETOPO** elevation grid (NOAA) is re-encoded to a grayscale wh
 (0 m) is mid-grey, land runs brighter and the sea floor darker; it drives a vertex displacement
 with `displacementBias` set so the mid-grey sea level sits exactly at R — land therefore rises and
 the sea floor sinks, revealing mid-ocean ridges, seamount chains and trenches in true position.
-A camera-following key light shades the relief from any angle. The vertical scale is exaggerated
+A **tangent-space normal map**, computed from the same ETOPO gradient at 8k, shades every ridge
+and valley per-pixel so land and sea floor stay detailed when zoomed in — beyond what the
+displaced geometry alone resolves. The surface texture, relief map and normal map are each
+served at a resolution matched to the GPU's limit (a 16k Blue Marble surface on high-end
+desktops, 8k on most machines, 4k on weak or mobile GPUs). A camera-following key light shades
+the relief from any angle. The vertical scale is exaggerated
 (true relief is <0.3% of the radius and would be invisible) — a disclosed, purely visual
 amplification that does not affect any datum in the panels. A site's
 latitude/longitude becomes a position on the sphere with the standard mapping that matches

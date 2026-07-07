@@ -159,14 +159,25 @@ function buildMaritime(){
 /* ETOPO combined relief: grey 0.5 = sea level, brighter = land, darker = ocean floor.
    displacementBias re-zeros sea level to R, so land rises and the sea floor sinks. */
 const DISP=R*0.05;              // full land+ocean vertical exaggeration (real relief is <0.3% of R)
+/* pick texture resolution to the GPU's limit — high-end desktops get the 16k surface,
+   most get 8k, weak/mobile GPUs get 4k. Keeps deep zoom sharp without breaking low-end. */
+function texTier(){
+  let maxT=8192;
+  try{ maxT=(Graph&&Graph.renderer&&Graph.renderer().capabilities.maxTextureSize)||8192; }catch(e){}
+  const mobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
+  if(maxT>=16384 && !mobile) return {color:'earth_bathy_16k.jpg', relief:'earth_relief_8k.jpg', normal:'earth_normal_8k.jpg', seg:640};
+  if(maxT>=8192)            return {color:'earth_bathy_8k.jpg',  relief:'earth_relief_8k.jpg', normal:'earth_normal_8k.jpg', seg:512};
+  return {color:'earth_bathy_4k.jpg', relief:'earth_relief_4k.jpg', normal:'earth_normal_4k.jpg', seg:384};
+}
 function earthMesh(){
   earthGroup=new THREE.Group();
-  const relief=tex('earth_relief.jpg');
-  if('colorSpace' in relief) relief.colorSpace=THREE.NoColorSpace;   // heightmap is data, not colour
-  const sph=new THREE.Mesh(new THREE.SphereGeometry(R,512,256),      // dense enough to resolve ridges & trenches
-    new THREE.MeshPhongMaterial({map:tex('earth_bathy_8k.jpg'),       // NASA Blue Marble w/ bathymetry — ocean shaded by depth
+  const T=texTier();
+  const relief=tex(T.relief);  if('colorSpace' in relief) relief.colorSpace=THREE.NoColorSpace;   // heightmap is data
+  const normal=tex(T.normal);  if('colorSpace' in normal) normal.colorSpace=THREE.NoColorSpace;   // normals are data
+  const sph=new THREE.Mesh(new THREE.SphereGeometry(R,T.seg,T.seg/2),
+    new THREE.MeshPhongMaterial({map:tex(T.color),                    // NASA Blue Marble w/ bathymetry — depth-shaded oceans
       displacementMap:relief, displacementScale:DISP, displacementBias:-DISP*0.5,   // 0.5 grey (sea level) → R
-      bumpMap:relief, bumpScale:9,                                    // shades undersea ridges & mountains
+      normalMap:normal, normalScale:new THREE.Vector2(1.1,1.1),       // per-pixel land & sea-floor detail, crisp at any zoom
       shininess:3, specular:0x0a1420}));
   sph.name='globe';
   earthGroup.add(sph);

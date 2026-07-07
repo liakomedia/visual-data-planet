@@ -32,6 +32,9 @@ of the ~315,000-site database:
   displacement) for **both land and ocean**: mountain ranges rise, and the sea floor drops
   away into depth-shaded basins with mid-ocean ridges, seamount chains and trenches
   (NASA Blue Marble bathymetry surface, so the oceans read by depth rather than flat blue)
+- **Sharp at any zoom** — a tangent-space normal map (from ETOPO) shades every ridge and
+  valley per-pixel, and the surface texture is served at the resolution the GPU allows
+  (up to a 16k NASA Blue Marble on desktops), so zooming into land or the sea floor stays crisp
 - **Mycorrhizal-fungi biodiversity hotspots** (15,496) from **SPUN**'s Underground Atlas —
   arbuscular (AM) and ectomycorrhizal (EcM) richness hotspots; over 90% lie *outside*
   protected areas
