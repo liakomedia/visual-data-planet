@@ -95,13 +95,13 @@ function buildEarthLayers(){
     earthGroup.add(pts); _clouds.push({pts,label,idxs,kind,data:arr});
   };
   if(typeof CITIES!=='undefined') mk(CITIES,'city','cities',R*1.004,
-    (c,it)=>c.setHSL(0.10,0.75,0.42+0.30*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),1.7,0.85);
+    (c,it)=>c.setHSL(0.09,0.95,0.50+0.28*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),2.6,0.95);
   if(typeof PEAKS!=='undefined') mk(PEAKS,'peak','mountain peaks ≥ 3,500 m',R*1.009,
-    (c,it)=>c.setHSL(0.08,0.18,0.55+0.4*Math.min(1,(it[2]-3500)/5000)),1.8,0.9);
+    (c,it)=>c.setHSL(0.07,0.25,0.62+0.36*Math.min(1,(it[2]-3500)/5000)),2.4,0.95);
   if(typeof PORTS!=='undefined') mk(PORTS,'port','ports',R*1.004,
-    (c)=>c.set(0x7fd8e8),1.7,0.9);
+    (c)=>c.set(0x8fe6f5),2.4,0.95);
   if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*1.02,
-    (c)=>c.set(0x5f96e8),3.6,0.8);
+    (c)=>c.set(0x6fa6f8),5.0,0.9);
 }
 function earthMesh(){
   earthGroup=new THREE.Group();
