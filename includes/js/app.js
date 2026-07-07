@@ -78,15 +78,41 @@ function buildClouds(){
   });
 }
 
+/* physical & human geography — cities (Natural Earth), mountain peaks (Wikidata),
+   ports and named oceans/seas (Natural Earth). Same picking/panel machinery. */
+function buildEarthLayers(){
+  const dot=dotTexture();
+  const mk=(arr,kind,label,posR,colorFn,size,opacity)=>{
+    const idxs=[],pos=[],col=[],c=new THREE.Color();
+    arr.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],posR); pos.push(v[0],v[1],v[2]);
+      colorFn(c,it); col.push(c.r,c.g,c.b); });
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+    const mat=new THREE.PointsMaterial({size, map:dot, vertexColors:true, transparent:true, opacity,
+      sizeAttenuation:false, depthWrite:false});
+    const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
+    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind,data:arr});
+  };
+  if(typeof CITIES!=='undefined') mk(CITIES,'city','cities',R*1.004,
+    (c,it)=>c.setHSL(0.10,0.75,0.42+0.30*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),1.7,0.85);
+  if(typeof PEAKS!=='undefined') mk(PEAKS,'peak','mountain peaks ≥ 3,500 m',R*1.009,
+    (c,it)=>c.setHSL(0.08,0.18,0.55+0.4*Math.min(1,(it[2]-3500)/5000)),1.8,0.9);
+  if(typeof PORTS!=='undefined') mk(PORTS,'port','ports',R*1.004,
+    (c)=>c.set(0x7fd8e8),1.7,0.9);
+  if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*1.02,
+    (c)=>c.set(0x5f96e8),3.6,0.8);
+}
 function earthMesh(){
   earthGroup=new THREE.Group();
   const sph=new THREE.Mesh(new THREE.SphereGeometry(R,72,48),
-    new THREE.MeshBasicMaterial({map:tex('2k_earth_daymap.jpg')}));
+    new THREE.MeshBasicMaterial({map:tex('4k_earth_daymap.jpg')}));
   earthGroup.add(sph);
   const halo=new THREE.Mesh(new THREE.SphereGeometry(R*1.02,48,32),
     new THREE.MeshBasicMaterial({color:0x8fe3a8, transparent:true, opacity:0.05, side:THREE.BackSide, depthWrite:false}));
   earthGroup.add(halo);
   buildClouds();
+  buildEarthLayers();
   buildLegend(); updateHud();   // clouds exist only now — the graph calls this factory lazily
   return earthGroup;
 }
@@ -137,6 +163,28 @@ function fmtArea(a){ if(!a) return '—';
   if(a<1) return Math.round(a*100)+' ha';
   return a.toLocaleString(undefined,{maximumFractionDigits:a<100?1:0})+' km²'; }
 function showSite(hit){
+  const kind=hit.cl.kind||'pp';
+  if(kind==='pp') return showPP(hit);
+  const it=hit.cl.data[hit.cl.idxs[hit.i]]; if(!it) return; pph.style.display='none';
+  let tag,col,h2,rows='',note='';
+  if(kind==='city'){ tag='City · Natural Earth'; col='#e8b45f'; h2=it[3]||'City';
+    rows=row('Country',it[4]||'—')+row('Population (urban area)',it[2]?it[2].toLocaleString():'—');
+    note='Natural Earth 10m populated places (public domain).'; }
+  else if(kind==='peak'){ tag='Mountain peak · Wikidata'; col='#e8dcc8'; h2=it[3]||'Peak';
+    rows=row('Elevation',it[2].toLocaleString()+' m ('+Math.round(it[2]*3.28084).toLocaleString()+' ft)');
+    note='Mountains with elevation ≥ 3,500 m — Wikidata (CC0).'; }
+  else if(kind==='port'){ tag='Port · Natural Earth'; col='#7fd8e8'; h2=it[2]||'Port';
+    note='Natural Earth 10m ports (public domain).'; }
+  else { tag='Ocean / sea · Natural Earth'; col='#5f96e8'; h2=it[2]||'Sea';
+    rows=row('Type',(it[3]||'sea').replace(/_/g,' '));
+    note='Named marine region — dot marks the label point of its main basin (Natural Earth, public domain).'; }
+  let h=`<span class="tag" style="background:${col};color:#04121a;border-color:${col}">${tag}</span>`;
+  h+=`<h2>${h2}</h2><div class="rows">${rows}`;
+  h+=row('Latitude',it[0].toFixed(2)+'°')+row('Longitude',it[1].toFixed(2)+'°')+`</div>`;
+  h+=`<div class="note" style="font-style:normal;color:#dbe4ff">${note}</div>`;
+  pbd.innerHTML=h; panel.classList.add('open');
+}
+function showPP(hit){
   const s=PP[hit.cl.idxs[hit.i]]; if(!s) return; pph.style.display='none';
   const marine=s[3]===1, col=marine?'#7fb8e8':'#8fe3a8';
   let h=`<span class="tag" style="background:${col};color:#04121a;border-color:${col}">Protected area · ${PP_REALM[s[3]]||'—'}</span>`;
@@ -179,8 +227,8 @@ function easeCam(toPos,toTarget,ms){
     ctr.update(); if(k<1) _camAnim=requestAnimationFrame(run); };
   cancelAnimationFrame(_camAnim); _camAnim=requestAnimationFrame(run);
 }
-function flyToSite(i){
-  const s=PP[i], v=llToVec(s[0],s[1],1);
+function flyToLL(lat,lon){
+  const v=llToVec(lat,lon,1);
   // account for the globe's current rotation
   const rot=earthGroup.rotation.y, cos=Math.cos(rot), sin=Math.sin(rot);
   const x=v[0]*cos+v[2]*sin, z=-v[0]*sin+v[2]*cos;
@@ -213,8 +261,13 @@ function buildLegend(){
   document.getElementById('legend-all').onchange=e=>{ const on=e.target.checked;
     _legendChips.forEach(c=>{ if(c.toggle && c.isOn()!==on) c.toggle(); });
     refreshLegendChips(); _syncLegendMaster(); };
+  const EARTH_SW={city:'#e8b45f',peak:'#e8dcc8',port:'#7fd8e8',sea:'#5f96e8'};
+  let earthHeadDone=false;
   _clouds.forEach((cl,ci)=>{
-    const sw = ci<GROUPS.length
+    let sw;
+    if(cl.kind){ if(!earthHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">EARTH LAYERS · click to hide / show</b>'); earthHeadDone=true; }
+      sw=`<span class="sw" style="background:${EARTH_SW[cl.kind]};border-radius:50%"></span>`; }
+    else sw = ci<GROUPS.length
       ? `<span class="sw" style="background:hsl(120,55%,${Math.round(GROUPS[ci].l*100)}%)"></span>`
       : `<span class="sw" style="background:#${SPECIALS[ci-GROUPS.length].color.toString(16)};border-radius:50%"></span>`;
     mkToggle(el, sw+cl.label+` <span style="color:#8ea3cf">${cl.idxs.length.toLocaleString()}</span>`,
@@ -224,23 +277,32 @@ function buildLegend(){
 }
 function updateHud(){
   document.getElementById('hud').innerHTML=
-    `${PP.length.toLocaleString()} protected areas · uniform sample of the ~315,000-site WDPA · `+
-    `17.6% of land &amp; 8.4% of the ocean protected<br/>drag to orbit · scroll to zoom · tap any dot for its data`;
+    `${PP.length.toLocaleString()} protected areas (sample of the ~315,000-site WDPA) · 17.6% of land &amp; 8.4% of ocean protected<br/>`+
+    `${(typeof CITIES!=='undefined'?CITIES.length.toLocaleString():0)} cities · ${(typeof PEAKS!=='undefined'?PEAKS.length.toLocaleString():0)} peaks · ports &amp; seas · drag to orbit · tap any dot for its data`;
 }
 
 /* ===================== SEARCH ===================== */
 const q=document.getElementById('q');
 let _searchHits=[], _searchN=0;
+function searchSources(){ const src=[{arr:PP,n:8,kind:'pp'}];
+  if(typeof CITIES!=='undefined') src.push({arr:CITIES,n:3,kind:'city'});
+  if(typeof PEAKS!=='undefined') src.push({arr:PEAKS,n:3,kind:'peak'});
+  if(typeof PORTS!=='undefined') src.push({arr:PORTS,n:2,kind:'port'});
+  if(typeof SEAS!=='undefined') src.push({arr:SEAS,n:2,kind:'sea'});
+  return src; }
 q.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const term=q.value.trim().toLowerCase(); if(!term) return;
-  if(!_searchHits.term || _searchHits.term!==term){
-    _searchHits=PP.map((s,i)=>s[8]&&s[8].toLowerCase().includes(term)?i:-1).filter(i=>i>=0);
+  if(_searchHits.term!==term){
+    _searchHits=[];
+    for(const src of searchSources())
+      src.arr.forEach((it,i)=>{ const nm=it[src.n]; if(nm && (''+nm).toLowerCase().includes(term)) _searchHits.push({src,i}); });
     _searchHits.term=term; _searchN=0;
   }
   if(!_searchHits.length) return;
-  const i=_searchHits[_searchN%_searchHits.length]; _searchN++;
-  flyToSite(i); showSite({cl:{idxs:[i]},i:0});
+  const hit=_searchHits[_searchN%_searchHits.length]; _searchN++;
+  const it=hit.src.arr[hit.i];
+  flyToLL(it[0],it[1]);
+  showSite({cl:{kind:hit.src.kind,idxs:[hit.i],data:hit.src.arr}, i:0});
 });
-
 /* legend button + references button */
 const legendBtn=document.getElementById('legend-btn'), legendEl=document.getElementById('legend');
 if(legendBtn&&legendEl) legendBtn.onclick=()=>{ legendEl.classList.toggle('open'); legendBtn.classList.toggle('open', legendEl.classList.contains('open')); };

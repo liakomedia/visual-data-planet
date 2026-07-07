@@ -5,6 +5,7 @@
 [![Three.js r183](https://img.shields.io/badge/three.js-r183-049EF4?style=flat&logo=threedotjs&logoColor=white)](https://threejs.org)
 [![Protected areas](https://img.shields.io/badge/protected_areas-31%2C362-8fe3a8?style=flat)](DATA.md)
 [![Source](https://img.shields.io/badge/data-WDPA_·_Protected_Planet-2f6f4f?style=flat)](https://www.protectedplanet.net)
+[![Earth layers](https://img.shields.io/badge/earth_layers-16%2C179_cities_·_peaks_·_ports_·_seas-e8b45f?style=flat)](DATA.md)
 [![Build](https://img.shields.io/badge/build-none_·_vanilla_JS-3fb950?style=flat)](#running-locally)
 
 ![Visual Data Planet — the rotating globe](preview.gif)
@@ -25,6 +26,10 @@ the ~315,000-site **World Database on Protected Areas** (WDPA, UNEP-WCMC & IUCN,
 - Search any park or reserve by name (Enter cycles matches); the camera flies to it
 - Context in the HUD: 17.6% of land and 8.4% of the ocean are protected
   (Protected Planet)
+- **Earth layers** for geographic context — **7,342 cities** (Natural Earth, coloured by
+  population), **7,461 mountain peaks ≥ 3,500 m** (Wikidata, brighter = higher),
+  **1,081 ports** and **295 named oceans & seas** (Natural Earth label points) — each
+  tappable with its own panel, searchable, and toggleable in the legend
 
 The mapping methodology — coordinate maths, sampling, centroid handling, and what is exact
 versus approximate — is documented in [METHODS.md](METHODS.md); sources and citation in
@@ -43,6 +48,9 @@ redistribution). Generate it once, then serve:
 node scripts/fetch-wdpa.mjs includes/js/planet-data.js
 python3 -m http.server 8000   # → http://localhost:8000/
 ```
+
+The earth layers file (`includes/js/planet-earth.js` — cities/peaks/ports/seas, public
+domain + CC0) **is** shipped; rebuild it any time with `node scripts/fetch-earth-layers.mjs`.
 
 ## Licence
 

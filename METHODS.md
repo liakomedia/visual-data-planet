@@ -8,7 +8,7 @@ every approximation is disclosed here and honoured in the panels.
 
 ## 1. The globe
 
-One textured Earth (equirectangular 2k day map on a sphere, radius R). A site's
+One textured Earth (equirectangular 4k day map on a sphere, radius R). A site's
 latitude/longitude becomes a position on the sphere with the standard mapping that matches
 equirectangular UVs:
 
@@ -17,7 +17,7 @@ equirectangular UVs:
 x = −R·sinφ·cosθ     y = R·cosφ     z = R·sinφ·sinθ
 ```
 
-The protected-area point clouds are **children of the globe group**, so the gentle
+All point clouds are **children of the globe group**, so the gentle
 rotation (⟳ Spin, pausable) carries every dot with the planet — picking accounts for the
 rotation via world-space raycasting, and the search fly-to compensates for the current
 rotation angle when aiming the camera.
@@ -55,16 +55,39 @@ and flags for the international designations.
 - The legend lists every layer with its live count and has the select/unselect-all
   tick box; one dot = one protected area, always.
 
-## 4. Interaction
+## 4. Earth layers — the geographic context
+
+Four non-WDPA layers, drawn slightly above the surface so the protected areas keep visual
+priority, give the globe its physical and human geography:
+
+- **Cities (7,342)** — Natural Earth 10m populated places; amber dots whose lightness
+  scales with log₁₀(urban population), so megacities glow brighter. Panels show country
+  and population.
+- **Mountain peaks (7,461)** — every Wikidata mountain (`P31 = Q8502`) with a recorded
+  elevation (`P2044`) of **≥ 3,500 m**; sand-to-white dots, brighter = higher. Panels show
+  the elevation in metres and feet.
+- **Ports (1,081)** — Natural Earth 10m ports, cyan.
+- **Named oceans & seas (295)** — Natural Earth marine polygons reduced to one **label
+  point** each (the bounding-box centre of the largest polygon part, lifted slightly off
+  the surface) — a disclosed approximation stated in each panel: the dot marks the label
+  point of a region, not a boundary.
+
+All four live in the legend under **EARTH LAYERS** with live counts and the same
+select/unselect-all control, and the search box covers them alongside the protected areas.
+These sources are public domain (Natural Earth) and CC0 (Wikidata), so unlike the WDPA
+extract the built file `includes/js/planet-earth.js` **is** shipped in the repository —
+rebuild it with `scripts/fetch-earth-layers.mjs`.
+
+## 5. Interaction
 
 - **Hover / tap** any dot: the raycaster finds the nearest visible point *on the camera's
   side of the globe* (hits behind the horizon are rejected) and the panel shows the site's
   real record — designation, IUCN category, area (km², or hectares under 1 km²), year,
   country code(s), and any World Heritage / Ramsar / MAB badges.
-- **Search** filters the 31k names; Enter flies the camera to the match (cycling through
-  multiple hits) and opens its panel.
+- **Search** covers all ~47k names — protected areas, cities, peaks, ports and seas;
+  Enter flies the camera to the match (cycling through multiple hits) and opens its panel.
 
-## 5. Honesty rules
+## 6. Honesty rules
 
 1. Latitudes and longitudes are the catalogue's; the only positional approximation is the
    bbox-centre of generalised polygons, and the sample is a blind 1-in-13 — no cherry-picking.
