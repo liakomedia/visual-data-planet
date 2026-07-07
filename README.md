@@ -1,10 +1,12 @@
-# Visual Data Planet — Earth's protected areas in 3D
+# Visual Data Planet — Earth mapped in 3D
 
 [![Live](https://img.shields.io/badge/live-vdata.liako.eu%2Fplanet-000000?style=flat&logo=googlechrome&logoColor=white)](https://vdata.liako.eu/planet/)
 [![Licence: MIT (code)](https://img.shields.io/badge/licence-MIT_(code)-f4f4f4?style=flat)](LICENSE)
 [![Three.js r183](https://img.shields.io/badge/three.js-r183-049EF4?style=flat&logo=threedotjs&logoColor=white)](https://threejs.org)
 [![Protected areas](https://img.shields.io/badge/protected_areas-31%2C362-8fe3a8?style=flat)](DATA.md)
 [![OECMs](https://img.shields.io/badge/OECMs-7%2C524-ff9d5c?style=flat)](DATA.md)
+[![Fungal hotspots](https://img.shields.io/badge/fungal_hotspots-15%2C496_·_SPUN-ff7ab8?style=flat)](DATA.md)
+[![Maritime](https://img.shields.io/badge/maritime-bathymetry_·_boundaries-58a6ff?style=flat)](DATA.md)
 [![Source](https://img.shields.io/badge/data-WDPA_·_Protected_Planet-2f6f4f?style=flat)](https://www.protectedplanet.net)
 [![Earth layers](https://img.shields.io/badge/earth_layers-16%2C179_cities_·_peaks_·_ports_·_seas-e8b45f?style=flat)](DATA.md)
 [![Build](https://img.shields.io/badge/build-none_·_vanilla_JS-3fb950?style=flat)](#running-locally)
@@ -13,9 +15,11 @@
 
 **Live: [vdata.liako.eu/planet](https://vdata.liako.eu/planet/)**
 
-Earth's protected areas on one interactive 3D globe — **31,362 sites**, a uniform sample of
-the ~315,000-site **World Database on Protected Areas** (WDPA, UNEP-WCMC & IUCN,
-[protectedplanet.net](https://www.protectedplanet.net)):
+Earth on one interactive 3D globe with **real shaded terrain**, overlaying open Earth
+datasets — protected areas and conservation, life, geography and the oceans. The core is the
+**World Database on Protected Areas** (WDPA, UNEP-WCMC & IUCN,
+[protectedplanet.net](https://www.protectedplanet.net)) — **31,362 sites**, a uniform sample
+of the ~315,000-site database:
 
 - Every dot is a real national park, strict reserve, natural monument, habitat area,
   protected landscape or marine sanctuary, at its true latitude/longitude —
@@ -26,6 +30,11 @@ the ~315,000-site **World Database on Protected Areas** (WDPA, UNEP-WCMC & IUCN,
   Conservation Measures) as its own orange layer
 - **3D terrain** — the globe carries real shaded relief (elevation displacement), so mountain
   ranges rise off the sphere
+- **Mycorrhizal-fungi biodiversity hotspots** (15,496) from **SPUN**'s Underground Atlas —
+  arbuscular (AM) and ectomycorrhizal (EcM) richness hotspots; over 90% lie *outside*
+  protected areas
+- **Maritime cartography** — bathymetric depth contours (isobaths at 200 / 2,000 / 4,000 /
+  6,000 m) and international maritime boundary lines (Natural Earth)
 - Tap any dot for its data: name, designation, IUCN category, reported area, year
   established, country
 - Search any park or reserve by name (Enter cycles matches); the camera flies to it

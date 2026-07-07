@@ -32,6 +32,7 @@ let NODES=[{id:'earth',name:'Earth',x:0,y:0,z:0}];   // one pinned node — the 
 const elGraph=document.getElementById('graph');
 let Graph, earthGroup, _ray=null;
 const _clouds=[];                                   // {pts,label,idxs (into PP)}
+const _lines=[];                                    // maritime line layers {obj,label,sw}
 const hiddenTypes=new Set(), _legendChips=[];
 function refreshLegendChips(){ _legendChips.forEach(c=>c.el.classList.toggle('off',!c.isOn())); }
 
@@ -118,6 +119,43 @@ function buildEarthLayers(){
   if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*1.055,
     (c)=>c.set(0x6fa6f8),5.0,0.9);
 }
+/* SPUN Underground Atlas — mycorrhizal fungal biodiversity hotspots (CC BY 4.0). */
+function buildFungi(){
+  if(typeof FUNGI==='undefined') return;
+  const dot=dotTexture();
+  const mk=(arr,label,color,ftype)=>{
+    const idxs=[],pos=[]; arr.forEach((f,i)=>{ idxs.push(i); const v=llToVec(f[0],f[1],R*1.037); pos.push(v[0],v[1],v[2]); });
+    const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    const mat=new THREE.PointsMaterial({size:2.4, map:dot, color, transparent:true, opacity:0.85, sizeAttenuation:false, depthWrite:false});
+    const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
+    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind:'fungi',data:arr,ftype});
+  };
+  mk(FUNGI.filter(f=>f[2]===0),'AM (arbuscular) richness hotspots',0xff7ab8,'Arbuscular mycorrhizal (AM)');
+  mk(FUNGI.filter(f=>f[2]===1),'EcM (ecto) richness hotspots',0xc98cff,'Ectomycorrhizal (EcM)');
+}
+
+/* Maritime cartography — bathymetric isobaths + maritime boundaries (Natural Earth, lines). */
+function depthColor(d){ const t=Math.min(1,Math.max(0,(d-200)/5800));
+  const c=new THREE.Color(); c.setHSL(0.58, 0.75, 0.72-0.42*t); return c; }   // shallow bright → deep dark blue
+function polysToSegments(lines, r){ const segs=[];
+  lines.forEach(fl=>{ for(let i=0;i<fl.length-2;i+=2){
+    const a=llToVec(fl[i],fl[i+1],r), b=llToVec(fl[i+2],fl[i+3],r);
+    segs.push(a[0],a[1],a[2], b[0],b[1],b[2]); } });
+  return segs; }
+function addLine(segs, color, opacity, label, sw){
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(segs,3));
+  const m=new THREE.LineBasicMaterial({color, transparent:true, opacity});
+  const ls=new THREE.LineSegments(g,m); ls.frustumCulled=false;
+  earthGroup.add(ls); _lines.push({obj:ls,label,sw});
+}
+function buildMaritime(){
+  if(typeof BATHY!=='undefined') BATHY.forEach(b=>{ const col=depthColor(b.d);
+    addLine(polysToSegments(b.lines, R*1.002), col, 0.5,
+      b.d.toLocaleString()+' m isobath', '#'+col.getHexString()); });
+  if(typeof MBOUNDS!=='undefined')
+    addLine(polysToSegments(MBOUNDS, R*1.006), 0xcbb3ff, 0.6, 'maritime boundaries', '#cbb3ff');
+}
+
 const DISP=R*0.03;   // vertical exaggeration of the terrain (real relief is <0.2% of R — invisible without it)
 function earthMesh(){
   earthGroup=new THREE.Group();
@@ -136,6 +174,8 @@ function earthMesh(){
   buildClouds();
   buildOECM();
   buildEarthLayers();
+  buildFungi();
+  buildMaritime();
   buildLegend(); updateHud();   // clouds exist only now — the graph calls this factory lazily
   return earthGroup;
 }
@@ -203,6 +243,9 @@ function showSite(hit){
     note='Mountains with elevation ≥ 3,500 m — Wikidata (CC0).'; }
   else if(kind==='port'){ tag='Port · Natural Earth'; col='#7fd8e8'; h2=it[2]||'Port';
     note='Natural Earth 10m ports (public domain).'; }
+  else if(kind==='fungi'){ tag='Fungal hotspot · SPUN'; col='#ff7ab8'; h2=hit.cl.ftype;
+    rows=row('Fungal group',hit.cl.ftype);
+    note='Predicted mycorrhizal-richness hotspot — SPUN Underground Atlas; Van Nuland et al. (2025), Nature (CC BY 4.0). Over 90% of these hotspots lie outside protected areas.'; }
   else if(kind==='oecm'){ tag='OECM · Protected Planet'; col='#ff9d5c'; h2=it[8]||'Unnamed OECM';
     rows=(typeof PPO_DESIG!=='undefined'?row('Designation',PPO_DESIG[it[7]]||'—'):'')
         +row('IUCN category',PP_IUCN[it[2]]||'—')+row('Reported area',fmtArea(it[4]))
@@ -271,7 +314,7 @@ function flyToLL(lat,lon){
 document.getElementById('bAll').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
 document.getElementById('bFit').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
 document.getElementById('bReset').onclick=()=>{ panel.classList.remove('open');
-  _clouds.forEach(c=>c.pts.visible=true); refreshLegendChips(); _syncLegendMaster();
+  _clouds.forEach(c=>c.pts.visible=true); _lines.forEach(l=>l.obj.visible=true); refreshLegendChips(); _syncLegendMaster();
   easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700); };
 const bSpin=document.getElementById('bSpin');
 if(bSpin) bSpin.onclick=()=>{ _spin=!_spin; bSpin.classList.toggle('active',_spin); };
@@ -296,11 +339,14 @@ function buildLegend(){
     _legendChips.forEach(c=>{ if(c.toggle && c.isOn()!==on) c.toggle(); });
     refreshLegendChips(); _syncLegendMaster(); };
   const EARTH_SW={city:'#e8b45f',peak:'#e8dcc8',port:'#7fd8e8',sea:'#5f96e8'};
-  let earthHeadDone=false, oecmHeadDone=false;
+  const FUNGI_SW={0:'#ff7ab8',1:'#c98cff'};
+  let earthHeadDone=false, oecmHeadDone=false, fungiHeadDone=false, fi=0;
   _clouds.forEach((cl,ci)=>{
     let sw;
     if(cl.kind==='oecm'){ if(!oecmHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">OTHER CONSERVATION (WD-OECM) · click to hide / show</b>'); oecmHeadDone=true; }
       sw='<span class="sw" style="background:#ff9d5c;border-radius:50%"></span>'; }
+    else if(cl.kind==='fungi'){ if(!fungiHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">FUNGAL BIODIVERSITY (SPUN) · click to hide / show</b>'); fungiHeadDone=true; }
+      sw=`<span class="sw" style="background:${FUNGI_SW[fi++]};border-radius:50%"></span>`; }
     else if(cl.kind){ if(!earthHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">EARTH LAYERS · click to hide / show</b>'); earthHeadDone=true; }
       sw=`<span class="sw" style="background:${EARTH_SW[cl.kind]};border-radius:50%"></span>`; }
     else sw = ci<GROUPS.length
@@ -309,13 +355,20 @@ function buildLegend(){
     mkToggle(el, sw+cl.label+` <span style="color:#8ea3cf">${cl.idxs.length.toLocaleString()}</span>`,
       ()=>cl.pts.visible, ()=>{ cl.pts.visible=!cl.pts.visible; });
   });
-  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">greens = land &amp; coast · blues = marine · one dot = one protected area</span>');
+  if(_lines.length){
+    el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">OCEANS &amp; MARITIME CARTOGRAPHY · click to hide / show</b>');
+    _lines.forEach(ln=>{
+      const sw=`<span class="sw" style="background:${ln.sw}"></span>`;
+      mkToggle(el, sw+ln.label, ()=>ln.obj.visible, ()=>{ ln.obj.visible=!ln.obj.visible; });
+    });
+  }
+  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">greens = land &amp; coast · blues = marine · isobaths deepen with depth · one dot = one record</span>');
 }
 function updateHud(){
+  const nF=(typeof FUNGI!=='undefined')?FUNGI.length.toLocaleString():0;
   document.getElementById('hud').innerHTML=
-    `${PP.length.toLocaleString()} protected areas (sample of the ~315,000-site WDPA)`+
-    `${(typeof PP_OECM!=='undefined'?' · '+PP_OECM.length.toLocaleString()+' OECMs':'')} · 17.6% of land &amp; 8.4% of ocean protected<br/>`+
-    `${(typeof CITIES!=='undefined'?CITIES.length.toLocaleString():0)} cities · ${(typeof PEAKS!=='undefined'?PEAKS.length.toLocaleString():0)} peaks · ports &amp; seas · 3D terrain · drag to orbit · tap any dot`;
+    `${PP.length.toLocaleString()} protected areas${(typeof PP_OECM!=='undefined'?' + '+PP_OECM.length.toLocaleString()+' OECMs':'')} (Protected Planet) · ${nF} mycorrhizal-fungi hotspots (SPUN)<br/>`+
+    `${(typeof CITIES!=='undefined'?CITIES.length.toLocaleString():0)} cities · ${(typeof PEAKS!=='undefined'?PEAKS.length.toLocaleString():0)} peaks · ports · seas · bathymetry &amp; maritime borders · 3D terrain · tap any dot`;
 }
 
 /* ===================== SEARCH ===================== */

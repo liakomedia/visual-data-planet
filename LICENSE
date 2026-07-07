@@ -31,8 +31,11 @@ SCOPE. This licence covers the CODE in this repository only. It does NOT cover:
    citation and terms at https://www.protectedplanet.net/en/legal.
 
 2. Earth imagery (includes/images/): Solar System Scope day-map texture (CC BY 4.0) and a
-   NASA-derived global elevation map (earth_topo.jpg, public domain). The earth-layers file
-   (includes/js/planet-earth.js) is built from Natural Earth (public domain) and Wikidata (CC0).
+   NASA-derived global elevation map (earth_topo.jpg, public domain). The earth-layers and
+   maritime files (includes/js/planet-earth.js, planet-maritime.js) are built from Natural
+   Earth (public domain) and Wikidata (CC0). The fungal-hotspots file (planet-fungi.js) is
+   derived from the SPUN Underground Atlas (Van Nuland et al. 2025, Nature; Zenodo
+   10.5281/zenodo.14871588), CC BY 4.0 — cite that work and acknowledge SPUN when reusing.
 
 3. The LIAKO name, logo, branding and visual identity, which remain the property
    of Liako and may not be used to endorse or promote derived works.

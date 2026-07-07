@@ -1,7 +1,7 @@
 # How the data becomes the map — Visual Data Planet
 
-Technical notes on how the World Database on Protected Areas becomes one interactive
-globe. Same principles as the sister apps: real coordinates are never bent for design, and
+Technical notes on how a set of open Earth datasets — protected areas, conservation, fungal
+biodiversity, geography and the oceans — become one interactive globe. Same principles as the sister apps: real coordinates are never bent for design, and
 every approximation is disclosed here and honoured in the panels.
 
 ---
@@ -105,7 +105,26 @@ rebuild it with `scripts/fetch-earth-layers.mjs`.
 - **Search** covers all ~47k names — protected areas, cities, peaks, ports and seas;
   Enter flies the camera to the match (cycling through multiple hits) and opens its panel.
 
-## 7. Honesty rules
+## 7. Fungal biodiversity and the oceans
+
+- **Mycorrhizal-fungi hotspots (SPUN).** The Underground Atlas publishes 1-km global rasters
+  of predicted arbuscular (AM) and ectomycorrhizal (EcM) fungal-richness *hotspots* in an
+  Equal-Earth projection. Each is a binary mask (a cell is a hotspot or it is not). The build
+  script averages each raster down to a ~617×300 grid, reprojects every hotspot cell centre to
+  latitude/longitude, and stores the result as two point layers (pink = AM, violet = EcM). At
+  this grid AM and EcM hotspots each cover only ~4% of the land and sit largely in different
+  places — arbuscular fungi peaking in the tropics and grasslands, ecto in temperate and
+  boreal forests. The panels state the headline finding: over 90% of these hotspots fall
+  outside protected areas.
+- **Bathymetry (isobaths).** Natural Earth's bathymetry polygons at 200 / 2,000 / 4,000 /
+  6,000 m are reduced to their outline rings and drawn as depth-coloured contour lines
+  (isobaths) just above the sea surface — shallow shelves bright, the deep ocean dark.
+- **Maritime boundaries.** Natural Earth's maritime boundary indicator lines are drawn as a
+  single pale line layer — the borders that continue national limits out over the sea.
+
+All three are toggleable in the legend and covered by the select/unselect-all control.
+
+## 8. Honesty rules
 
 1. Latitudes and longitudes are the catalogue's; the only positional approximation is the
    bbox-centre of generalised polygons, and the sample is a blind 1-in-13 — no cherry-picking.

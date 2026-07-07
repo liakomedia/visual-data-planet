@@ -4,26 +4,26 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <meta name="theme-color" content="#05070e"/>
-<title>Visual Data Planet — Earth's Protected Areas in 3D</title>
-<meta name="description" content="Every protected area on Earth in one interactive 3D globe — 31,000+ national parks, reserves, marine protected areas, World Heritage sites, Ramsar wetlands and biospheres from the World Database on Protected Areas (WDPA), each with its real data."/>
+<title>Visual Data Planet — Earth Mapped in 3D</title>
+<meta name="description" content="Earth on one interactive 3D globe with real terrain — 31,000+ protected areas and OECMs (Protected Planet), mycorrhizal-fungi biodiversity hotspots (SPUN), cities, mountain peaks, ports, named seas, bathymetric depth contours and maritime boundaries, each with its real data."/>
 <link rel="canonical" href="https://vdata.liako.eu/planet/"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Visual Data by Liako"/>
 <meta property="og:url" content="https://vdata.liako.eu/planet/"/>
-<meta property="og:title" content="Visual Data Planet — Earth's Protected Areas in 3D"/>
-<meta property="og:description" content="31,000+ protected areas — national parks, marine reserves, World Heritage sites, Ramsar wetlands — on one interactive 3D globe, from the World Database on Protected Areas."/>
+<meta property="og:title" content="Visual Data Planet — Earth Mapped in 3D"/>
+<meta property="og:description" content="A 3D Earth with real terrain: protected areas & OECMs (Protected Planet), fungal-biodiversity hotspots (SPUN), cities, peaks, ports, seas, bathymetry and maritime boundaries."/>
 <meta property="og:image" content="https://vdata.liako.eu/og/planet.jpg"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
-<meta property="og:image:alt" content="3D globe of Earth's protected areas"/>
+<meta property="og:image:alt" content="3D globe of Earth — protected areas, terrain and ocean data"/>
 <meta property="og:locale" content="en_US"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="Visual Data Planet — Earth's Protected Areas in 3D"/>
-<meta name="twitter:description" content="31,000+ protected areas on one interactive 3D globe — from the World Database on Protected Areas (WDPA)."/>
+<meta name="twitter:title" content="Visual Data Planet — Earth Mapped in 3D"/>
+<meta name="twitter:description" content="A 3D Earth with terrain, protected areas & OECMs, fungal-biodiversity hotspots, cities, peaks, bathymetry and maritime boundaries."/>
 <meta name="twitter:image" content="https://vdata.liako.eu/og/planet.jpg"/>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"WebApplication","@id":"https://vdata.liako.eu/planet/#app","name":"Visual Data Planet","url":"https://vdata.liako.eu/planet/","description":"Interactive 3D globe of Earth's protected areas — 31,000+ sites sampled from the World Database on Protected Areas (WDPA): national parks, strict reserves, marine protected areas, UNESCO World Heritage sites, Ramsar wetlands and MAB biospheres, each with its designation, IUCN category, area and country.","applicationCategory":"EducationalApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and WebGL","isAccessibleForFree":true,"inLanguage":"en","image":"https://vdata.liako.eu/og/planet.jpg","creator":{"@id":"https://liako.eu/#organization"},"publisher":{"@id":"https://liako.eu/#organization"},"isPartOf":{"@id":"https://vdata.liako.eu/#website"},"about":[{"@type":"Thing","name":"Protected area","sameAs":"https://en.wikipedia.org/wiki/Protected_area"},{"@type":"Thing","name":"Nature conservation","sameAs":"https://en.wikipedia.org/wiki/Nature_conservation"}]},
+ {"@type":"WebApplication","@id":"https://vdata.liako.eu/planet/#app","name":"Visual Data Planet","url":"https://vdata.liako.eu/planet/","description":"Interactive 3D globe of Earth with real shaded terrain, overlaying open Earth datasets: protected areas and OECMs from Protected Planet (WDPA & WD-OECM), mycorrhizal-fungi biodiversity hotspots from SPUN, cities, mountain peaks, ports, named oceans and seas, bathymetric depth contours and maritime boundaries — each dot or line carrying its real record.","applicationCategory":"EducationalApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and WebGL","isAccessibleForFree":true,"inLanguage":"en","image":"https://vdata.liako.eu/og/planet.jpg","creator":{"@id":"https://liako.eu/#organization"},"publisher":{"@id":"https://liako.eu/#organization"},"isPartOf":{"@id":"https://vdata.liako.eu/#website"},"about":[{"@type":"Thing","name":"Protected area","sameAs":"https://en.wikipedia.org/wiki/Protected_area"},{"@type":"Thing","name":"Nature conservation","sameAs":"https://en.wikipedia.org/wiki/Nature_conservation"},{"@type":"Thing","name":"Mycorrhiza","sameAs":"https://en.wikipedia.org/wiki/Mycorrhiza"},{"@type":"Thing","name":"Bathymetry","sameAs":"https://en.wikipedia.org/wiki/Bathymetry"}]},
  {"@type":"BreadcrumbList","@id":"https://vdata.liako.eu/planet/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Visual Data","item":"https://vdata.liako.eu/"},{"@type":"ListItem","position":2,"name":"Planet","item":"https://vdata.liako.eu/planet/"}]},
  {"@type":"WebSite","@id":"https://vdata.liako.eu/#website","name":"Visual Data by Liako","url":"https://vdata.liako.eu/","publisher":{"@id":"https://liako.eu/#organization"}},
  {"@type":"Organization","@id":"https://liako.eu/#organization","name":"Liako","url":"https://liako.eu/"}
@@ -44,7 +44,7 @@
 <header>
   <div class="brand">
     <h1>Visual Data <span class="d">Planet</span></h1>
-    <div class="sub">Earth's protected areas — every dot a real national park, reserve or marine sanctuary from the WDPA.</div>
+    <div class="sub">Earth in 3D — protected areas &amp; OECMs, fungal-biodiversity hotspots, cities, peaks, ports, seas, bathymetry &amp; maritime borders, on real terrain.</div>
   </div>
   <div id="controls">
     <button id="bAll" title="Zoom back out to the whole planet">Overview</button>
@@ -52,7 +52,7 @@
     <button id="bReset" title="Return to the start view and show all layers">Reset</button>
     <button id="bSpin" class="active" title="Pause / resume the globe's rotation">⟳ Spin</button>
   </div>
-  <div id="search"><input id="q" type="search" placeholder="Search a park, reserve, site… (Enter cycles matches)" autocomplete="off"/></div>
+  <div id="search"><input id="q" type="search" placeholder="Search a park, OECM, city, peak, sea… (Enter cycles matches)" autocomplete="off"/></div>
 </header>
 <div id="crumbs"></div>
 
@@ -74,6 +74,8 @@
     International designations shown: UNESCO World Heritage · Ramsar Convention wetlands · UNESCO-MAB biosphere reserves (as recorded in the WDPA)<br/>
     Cities, ports &amp; named seas: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth 10m (public domain) ↗</a><br/>
     Mountain peaks (≥ 3,500 m): <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata (CC0) ↗</a><br/>
+    Bathymetry &amp; maritime boundaries: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth 10m (public domain) ↗</a><br/>
+    Mycorrhizal-fungi hotspots: <a href="https://www.spun.earth" target="_blank" rel="noopener">SPUN Underground Atlas ↗</a> — Van Nuland et al. (2025), <a href="https://www.nature.com/articles/s41586-025-09277-4" target="_blank" rel="noopener">Nature ↗</a> (<a href="https://doi.org/10.5281/zenodo.14871588" target="_blank" rel="noopener">Zenodo, CC BY 4.0 ↗</a>)<br/>
     Earth imagery: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope (CC BY 4.0) ↗</a><br/>
     Coverage statistics (17.6% land · 8.4% ocean): <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">Protected Planet ↗</a><br/>
     Source code — open source (MIT): <a href="https://github.com/liakomedia/visual-data-planet" target="_blank" rel="noopener"><b>github.com/liakomedia/visual-data-planet ↗</b></a>
@@ -90,7 +92,9 @@ catch(e){ window.THREE=await import('https://cdn.jsdelivr.net/npm/three@0.183.0/
 </script>
 <script src="includes/js/planet-data.js?v=4"></script>
 <script src="includes/js/planet-earth.js?v=1"></script>
-<script src="includes/js/app.js?v=7"></script>
+<script src="includes/js/planet-maritime.js?v=1"></script>
+<script src="includes/js/planet-fungi.js?v=1"></script>
+<script src="includes/js/app.js?v=8"></script>
 <script defer src="/track.js"></script>
 </body>
 </html>
