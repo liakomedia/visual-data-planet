@@ -48,13 +48,30 @@ function dotTexture(){
   const t=new THREE.CanvasTexture(cv); return t;
 }
 
+/* sample the ETOPO relief so every dot sits ON the displaced surface (no floating parallax) */
+let _hgt=null,_hgtW=0,_hgtH=0,_hgtReady=false;
+(function(){ const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ try{ const cv=document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+    const g=cv.getContext('2d'); g.drawImage(img,0,0);
+    _hgt=g.getImageData(0,0,img.width,img.height).data; _hgtW=img.width; _hgtH=img.height; }catch(e){}
+    _hgtReady=true; };
+  img.onerror=()=>{ _hgtReady=true; };
+  img.src='includes/images/tex/earth_relief_4k.jpg'; })();
+function terrainR(lat,lon,lift){
+  let rad=R;
+  if(_hgt){ let x=Math.round(((lon+180)/360)*_hgtW), y=Math.round(((90-lat)/180)*_hgtH);
+    x=x<0?0:(x>=_hgtW?_hgtW-1:x); y=y<0?0:(y>=_hgtH?_hgtH-1:y);
+    const g=_hgt[(y*_hgtW+x)*4]/255; rad=R+DISP*(g-0.5); }         // DISP*(grey-0.5) = the displaced height
+  return rad + R*0.0012 + (lift||0);                               // a hair above the surface
+}
+
 function buildClouds(){
   const dot=dotTexture();
   // IUCN groups — per-point colour: terrestrial greens / marine blues (hue), lightness by group
   GROUPS.forEach(gr=>{
     const idxs=[], pos=[], col=[], c=new THREE.Color();
     PP.forEach((s,i)=>{ if(!gr.cats.includes(s[2])) return;
-      idxs.push(i); const v=llToVec(s[0],s[1],R*1.034);
+      idxs.push(i); const v=llToVec(s[0],s[1],terrainR(s[0],s[1],R*0.001));
       pos.push(v[0],v[1],v[2]);
       c.setHSL(s[3]===1?0.55:0.335, 0.62, gr.l);          // marine → blue, land/coastal → green
       col.push(c.r,c.g,c.b); });
@@ -70,7 +87,7 @@ function buildClouds(){
   SPECIALS.forEach(sp=>{
     const idxs=[], pos=[];
     PP.forEach((s,i)=>{ if(!(s[9]&sp.flag)) return;
-      idxs.push(i); const v=llToVec(s[0],s[1],R*1.05); pos.push(v[0],v[1],v[2]); });
+      idxs.push(i); const v=llToVec(s[0],s[1],terrainR(s[0],s[1],R*0.005)); pos.push(v[0],v[1],v[2]); });
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
     const mat=new THREE.PointsMaterial({size:sp.size, map:dot, color:sp.color, transparent:true, opacity:0.95,
@@ -85,7 +102,7 @@ function buildClouds(){
 function buildOECM(){
   if(typeof PP_OECM==='undefined') return;
   const dot=dotTexture(), pos=[], idxs=[];
-  PP_OECM.forEach((o,i)=>{ idxs.push(i); const v=llToVec(o[0],o[1],R*1.038); pos.push(v[0],v[1],v[2]); });
+  PP_OECM.forEach((o,i)=>{ idxs.push(i); const v=llToVec(o[0],o[1],terrainR(o[0],o[1],R*0.002)); pos.push(v[0],v[1],v[2]); });
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   const mat=new THREE.PointsMaterial({size:3.4, map:dot, color:0xff9d5c, transparent:true, opacity:0.92,
@@ -101,7 +118,7 @@ function buildEarthLayers(){
   const EARTH_SW={city:'#e8b45f',peak:'#e8dcc8',port:'#7fd8e8',sea:'#5f96e8'};
   const mk=(arr,kind,label,posR,colorFn,size,opacity)=>{
     const idxs=[],pos=[],col=[],c=new THREE.Color();
-    arr.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],posR); pos.push(v[0],v[1],v[2]);
+    arr.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],terrainR(it[0],it[1],posR)); pos.push(v[0],v[1],v[2]);
       colorFn(c,it); col.push(c.r,c.g,c.b); });
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
@@ -111,13 +128,13 @@ function buildEarthLayers(){
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
     earthGroup.add(pts); _clouds.push({pts,label,idxs,kind,data:arr,grp:'earth',sw:'<span class="sw" style="background:'+EARTH_SW[kind]+';border-radius:50%"></span>'});
   };
-  if(typeof CITIES!=='undefined') mk(CITIES,'city','cities',R*1.033,
+  if(typeof CITIES!=='undefined') mk(CITIES,'city','cities',R*0.0015,
     (c,it)=>c.setHSL(0.09,0.95,0.50+0.28*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),3.6,0.95);
-  if(typeof PEAKS!=='undefined') mk(PEAKS,'peak','mountain peaks ≥ 3,500 m',R*1.045,
+  if(typeof PEAKS!=='undefined') mk(PEAKS,'peak','mountain peaks ≥ 3,500 m',R*0.003,
     (c,it)=>c.setHSL(0.07,0.25,0.62+0.36*Math.min(1,(it[2]-3500)/5000)),3.4,0.95);
-  if(typeof PORTS!=='undefined') mk(PORTS,'port','ports',R*1.033,
+  if(typeof PORTS!=='undefined') mk(PORTS,'port','ports',R*0.0015,
     (c)=>c.set(0x8fe6f5),3.4,0.95);
-  if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*1.055,
+  if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*0.004,
     (c)=>c.set(0x6fa6f8),6.5,0.9);
 }
 /* SPUN Underground Atlas — mycorrhizal fungal biodiversity hotspots (CC BY 4.0). */
@@ -125,7 +142,7 @@ function buildFungi(){
   if(typeof FUNGI==='undefined') return;
   const dot=dotTexture();
   const mk=(arr,label,color,ftype)=>{
-    const idxs=[],pos=[]; arr.forEach((f,i)=>{ idxs.push(i); const v=llToVec(f[0],f[1],R*1.037); pos.push(v[0],v[1],v[2]); });
+    const idxs=[],pos=[]; arr.forEach((f,i)=>{ idxs.push(i); const v=llToVec(f[0],f[1],terrainR(f[0],f[1],R*0.002)); pos.push(v[0],v[1],v[2]); });
     const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
     const mat=new THREE.PointsMaterial({size:3.4, map:dot, color, transparent:true, opacity:0.85, sizeAttenuation:false, depthWrite:false});
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
@@ -138,9 +155,10 @@ function buildFungi(){
 /* Maritime cartography — bathymetric isobaths + maritime boundaries (Natural Earth, lines). */
 function depthColor(d){ const t=Math.min(1,Math.max(0,(d-200)/5800));
   const c=new THREE.Color(); c.setHSL(0.58, 0.75, 0.72-0.42*t); return c; }   // shallow bright → deep dark blue
-function polysToSegments(lines, r){ const segs=[];
+function polysToSegments(lines, r, terr){ const segs=[];
+  const rad=(la,lo)=> (terr!=null? terrainR(la,lo,terr) : r);
   lines.forEach(fl=>{ for(let i=0;i<fl.length-2;i+=2){
-    const a=llToVec(fl[i],fl[i+1],r), b=llToVec(fl[i+2],fl[i+3],r);
+    const a=llToVec(fl[i],fl[i+1],rad(fl[i],fl[i+1])), b=llToVec(fl[i+2],fl[i+3],rad(fl[i+2],fl[i+3]));
     segs.push(a[0],a[1],a[2], b[0],b[1],b[2]); } });
   return segs; }
 function addLine(segs, color, opacity, label, sw){
@@ -180,7 +198,7 @@ function ptsHiddenVC(pos, col, size, opacity){
 function buildAPIs(){
   if(typeof APIS==='undefined') return;
   API_SECTIONS.forEach((sec,si)=>{
-    const idxs=[],pos=[]; APIS.forEach((a,i)=>{ if(a[2]!==si) return; idxs.push(i); const v=llToVec(a[0],a[1],R*1.036); pos.push(v[0],v[1],v[2]); });
+    const idxs=[],pos=[]; APIS.forEach((a,i)=>{ if(a[2]!==si) return; idxs.push(i); const v=llToVec(a[0],a[1],terrainR(a[0],a[1],R*0.0035)); pos.push(v[0],v[1],v[2]); });
     if(!idxs.length) return;
     const pts=ptsHidden(pos, parseInt(API_SW[si].slice(1),16), 3.0, 0.9);
     _clouds.push({pts,label:sec,idxs,kind:'api',data:APIS,grp:'api',
@@ -190,17 +208,17 @@ function buildAPIs(){
 function buildPopulation(){
   if(typeof CITIES==='undefined') return;
   const idxs=[],pos=[],col=[],c=new THREE.Color();
-  CITIES.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],R*1.035); pos.push(v[0],v[1],v[2]);
+  CITIES.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],terrainR(it[0],it[1],R*0.0015)); pos.push(v[0],v[1],v[2]);
     const t=Math.min(1,Math.log10(Math.max(1,it[2]))/7.3); c.setHSL(0.14-0.14*t,0.95,0.4+0.2*t); col.push(c.r,c.g,c.b); });
   const pts=ptsHiddenVC(pos,col,3.4,0.9);
   _clouds.push({pts,label:'population centres (by inhabitants)',idxs,kind:'pop',data:CITIES,grp:'population',
     sw:'<span class="sw" style="background:#ff5a3c;border-radius:50%"></span>'});
 }
 function buildPolitical(){
-  if(typeof BORDERS!=='undefined'){ addLine(polysToSegments(BORDERS,R*1.006),0xffe6a8,0.5,'country borders','#ffe6a8');
+  if(typeof BORDERS!=='undefined'){ addLine(polysToSegments(BORDERS,R*1.006,R*0.003),0xffe6a8,0.5,'country borders','#ffe6a8');
     const ln=_lines[_lines.length-1]; ln.grp='political'; }
   if(typeof CAPITALS!=='undefined'){
-    const idxs=[],pos=[]; CAPITALS.forEach((c,i)=>{ idxs.push(i); const v=llToVec(c[0],c[1],R*1.041); pos.push(v[0],v[1],v[2]); });
+    const idxs=[],pos=[]; CAPITALS.forEach((c,i)=>{ idxs.push(i); const v=llToVec(c[0],c[1],terrainR(c[0],c[1],R*0.005)); pos.push(v[0],v[1],v[2]); });
     const pts=ptsHidden(pos,0xffd24a,4.2,0.95);
     _clouds.push({pts,label:'capitals',idxs,kind:'capital',data:CAPITALS,grp:'political',
       sw:'<span class="sw" style="background:#ffd24a;border-radius:50%"></span>'});
@@ -208,7 +226,7 @@ function buildPolitical(){
 }
 function buildLogistics(){
   if(typeof AIRPORTS==='undefined') return;
-  const idxs=[],pos=[]; AIRPORTS.forEach((a,i)=>{ idxs.push(i); const v=llToVec(a[0],a[1],R*1.035); pos.push(v[0],v[1],v[2]); });
+  const idxs=[],pos=[]; AIRPORTS.forEach((a,i)=>{ idxs.push(i); const v=llToVec(a[0],a[1],terrainR(a[0],a[1],R*0.002)); pos.push(v[0],v[1],v[2]); });
   const pts=ptsHidden(pos,0x74e0ff,3.0,0.85);
   _clouds.push({pts,label:'airports (large & medium)',idxs,kind:'airport',data:AIRPORTS,grp:'logistics',
     sw:'<span class="sw" style="background:#74e0ff;border-radius:50%"></span>'});
@@ -216,7 +234,7 @@ function buildLogistics(){
 function buildDisasters(){
   if(typeof QUAKES!=='undefined'){
     const idxs=[],pos=[],col=[],c=new THREE.Color();
-    QUAKES.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],R*1.038); pos.push(v[0],v[1],v[2]);
+    QUAKES.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],terrainR(qk[0],qk[1],R*0.0045)); pos.push(v[0],v[1],v[2]);
       const t=Math.min(1,Math.max(0,(qk[2]-4)/4)); c.setHSL(0.12-0.12*t,0.95,0.55); col.push(c.r,c.g,c.b); });
     const pts=ptsHiddenVC(pos,col,4.2,0.92);
     _clouds.push({pts,label:'earthquakes M4.5+ · recent',idxs,kind:'quake',data:QUAKES,grp:'disasters',
@@ -224,14 +242,14 @@ function buildDisasters(){
   }
   if(typeof QUAKES_HIST!=='undefined'){
     const idxs=[],pos=[],col=[],c=new THREE.Color();
-    QUAKES_HIST.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],R*1.03); pos.push(v[0],v[1],v[2]);
+    QUAKES_HIST.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],terrainR(qk[0],qk[1],R*0.001)); pos.push(v[0],v[1],v[2]);
       const t=Math.min(1,Math.max(0,(qk[2]-5)/3.5)); c.setHSL(0.12-0.12*t,0.95,0.5); col.push(c.r,c.g,c.b); });
     const pts=ptsHiddenVC(pos,col,2.8,0.85);
     _clouds.push({pts,label:'earthquakes M5+ · since 2000',idxs,kind:'quakeh',data:QUAKES_HIST,grp:'disasters',
       sw:'<span class="sw" style="background:#ffb03a;border-radius:50%"></span>'});
   }
   if(typeof EONET!=='undefined'){
-    const idxs=[],pos=[]; EONET.forEach((e,i)=>{ idxs.push(i); const v=llToVec(e[0],e[1],R*1.042); pos.push(v[0],v[1],v[2]); });
+    const idxs=[],pos=[]; EONET.forEach((e,i)=>{ idxs.push(i); const v=llToVec(e[0],e[1],terrainR(e[0],e[1],R*0.005)); pos.push(v[0],v[1],v[2]); });
     const pts=ptsHidden(pos,0xffa640,4.2,0.95);
     _clouds.push({pts,label:'natural events, open (NASA EONET)',idxs,kind:'eonet',data:EONET,grp:'disasters',
       sw:'<span class="sw" style="background:#ffa640;border-radius:50%"></span>'});
@@ -240,7 +258,7 @@ function buildDisasters(){
 function buildClimate(){
   if(typeof CLIMATE==='undefined') return;
   const idxs=[],pos=[],col=[],c=new THREE.Color();
-  CLIMATE.forEach((pt,i)=>{ idxs.push(i); const v=llToVec(pt[0],pt[1],R*1.031); pos.push(v[0],v[1],v[2]);
+  CLIMATE.forEach((pt,i)=>{ idxs.push(i); const v=llToVec(pt[0],pt[1],terrainR(pt[0],pt[1],R*0)); pos.push(v[0],v[1],v[2]);
     c.set(CLIM_G[koppenGroup(pt[2])]); col.push(c.r,c.g,c.b); });
   const pts=ptsHiddenVC(pos,col,3.2,0.72);
   _clouds.push({pts,label:'Koppen climate zones (A/B/C/D/E)',idxs,kind:'climate',data:CLIMATE,grp:'climate',
@@ -285,6 +303,7 @@ function earthMesh(){
 
 function boot(){
   if(typeof ForceGraph3D==='undefined'||typeof THREE==='undefined'){ setTimeout(boot,120); return; }
+  if(!_hgtReady){ setTimeout(boot,120); return; }   // relief heightmap loaded → dots sit on the surface
   document.getElementById('loading').classList.add('done');
   Graph=ForceGraph3D({controlType:'orbit'})(elGraph)
     .enableNodeDrag(false)
