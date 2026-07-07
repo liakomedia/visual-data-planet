@@ -37,7 +37,8 @@ function refreshLegendChips(){ _legendChips.forEach(c=>c.el.classList.toggle('of
 
 let _texLoader=null;
 function tex(f){ if(!_texLoader) _texLoader=new THREE.TextureLoader();
-  const t=_texLoader.load('includes/images/tex/'+f); if('colorSpace' in t) t.colorSpace='srgb'; return t; }
+  const t=_texLoader.load('includes/images/tex/'+f); if('colorSpace' in t) t.colorSpace='srgb';
+  t.anisotropy=8; return t; }
 function dotTexture(){
   const cv=document.createElement('canvas'); cv.width=cv.height=64;
   const g=cv.getContext('2d'), gr=g.createRadialGradient(32,32,0,32,32,32);
@@ -106,7 +107,7 @@ function buildEarthLayers(){
 function earthMesh(){
   earthGroup=new THREE.Group();
   const sph=new THREE.Mesh(new THREE.SphereGeometry(R,72,48),
-    new THREE.MeshBasicMaterial({map:tex('4k_earth_daymap.jpg')}));
+    new THREE.MeshBasicMaterial({map:tex('8k_earth_daymap.jpg')}));
   earthGroup.add(sph);
   const halo=new THREE.Mesh(new THREE.SphereGeometry(R*1.02,48,32),
     new THREE.MeshBasicMaterial({color:0x8fe3a8, transparent:true, opacity:0.05, side:THREE.BackSide, depthWrite:false}));

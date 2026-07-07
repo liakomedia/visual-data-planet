@@ -8,7 +8,7 @@ every approximation is disclosed here and honoured in the panels.
 
 ## 1. The globe
 
-One textured Earth (equirectangular 4k day map on a sphere, radius R). A site's
+One textured Earth (equirectangular 8k day map on a sphere, radius R). A site's
 latitude/longitude becomes a position on the sphere with the standard mapping that matches
 equirectangular UVs:
 
