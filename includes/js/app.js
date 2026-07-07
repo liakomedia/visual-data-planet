@@ -357,7 +357,7 @@ function showSite(hit){
         +(it[5]?row('Established',it[5]):'')
         +(typeof PPO_ISO!=='undefined'?row('Country / territory',(PPO_ISO[it[6]]||'—').split(';').join(' · ')):'');
     note='Other Effective area-based Conservation Measure — WD-OECM, UNEP-WCMC & IUCN, protectedplanet.net.'; }
-  else if(kind==='api'){ tag='Public API - '+(API_SECTIONS[it[2]]||''); col=API_SW[it[2]]||'#8fd3ff'; h2=it[3];
+  else if(kind==='api'){ tag=(API_SECTIONS[it[2]]||'API'); col=API_SW[it[2]]||'#8fd3ff'; h2=it[3];
     rows=row('Category',API_SECTIONS[it[2]]||'-')+row('Host',it[4])+row('Auth',it[5]||'No')+(it[6]?row('About',it[6]):'');
     note='Server location of <a href="'+it[7]+'" target="_blank" rel="noopener" style="color:#8fd3ff">'+it[4]+' ↗</a> - list: public-apis (geolocation: ip-api.com).'; }
   else if(kind==='capital'){ tag='Capital city'; col='#ffd24a'; h2=it[2]||'Capital';
