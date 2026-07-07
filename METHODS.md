@@ -8,7 +8,11 @@ every approximation is disclosed here and honoured in the panels.
 
 ## 1. The globe
 
-One textured Earth (equirectangular 8k day map on a sphere, radius R). A site's
+One textured Earth (equirectangular 8k day map on a sphere, radius R) with **real 3D terrain**:
+a global elevation grayscale drives a vertex displacement so mountain ranges physically rise off
+the sphere, lit by a camera-following key light so the relief reads from any angle. The vertical
+scale is exaggerated (true relief is <0.2% of the radius and would be invisible) — a disclosed,
+purely visual amplification that does not affect any datum in the panels. A site's
 latitude/longitude becomes a position on the sphere with the standard mapping that matches
 equirectangular UVs:
 
@@ -42,7 +46,21 @@ Per site the extract keeps: name, designation (921 distinct), IUCN category, rea
 (terrestrial / marine / coastal), reported area (km²), status year, country ISO3 code(s),
 and flags for the international designations.
 
-## 3. Layers and colour
+## 3. The two Protected Planet databases
+
+Protected Planet publishes several databases; this map draws the two spatial ones:
+
+- **WDPA** — the World Database on Protected Areas (the sample described above), greens/blues.
+- **WD-OECM** — the World Database on Other Effective area-based Conservation Measures: areas
+  that achieve conservation outcomes without being formally designated "protected areas"
+  (Indigenous and community lands, some private and military areas, etc.). The **complete**
+  OECM point and polygon layers (7,524 sites) are drawn as a distinct **orange** layer with its
+  own legend toggle and panels. (Protected Planet's other databases — GD-PAME management
+  effectiveness, the ICCA Registry and the IUCN Green List — are assessments or registries
+  attached to these same sites rather than separate global geometries, so they are not drawn as
+  extra point layers.)
+
+## 4. Layers and colour
 
 - **Seven IUCN layers**: Ia·Ib (strict nature reserves & wilderness), II (national
   parks), III (natural monuments), IV (habitat & species areas), V (protected
@@ -55,7 +73,7 @@ and flags for the international designations.
 - The legend lists every layer with its live count and has the select/unselect-all
   tick box; one dot = one protected area, always.
 
-## 4. Earth layers — the geographic context
+## 5. Earth layers — the geographic context
 
 Four non-WDPA layers, drawn slightly above the surface so the protected areas keep visual
 priority, give the globe its physical and human geography:
@@ -78,7 +96,7 @@ These sources are public domain (Natural Earth) and CC0 (Wikidata), so unlike th
 extract the built file `includes/js/planet-earth.js` **is** shipped in the repository —
 rebuild it with `scripts/fetch-earth-layers.mjs`.
 
-## 5. Interaction
+## 6. Interaction
 
 - **Hover / tap** any dot: the raycaster finds the nearest visible point *on the camera's
   side of the globe* (hits behind the horizon are rejected) and the panel shows the site's
@@ -87,7 +105,7 @@ rebuild it with `scripts/fetch-earth-layers.mjs`.
 - **Search** covers all ~47k names — protected areas, cities, peaks, ports and seas;
   Enter flies the camera to the match (cycling through multiple hits) and opens its panel.
 
-## 6. Honesty rules
+## 7. Honesty rules
 
 1. Latitudes and longitudes are the catalogue's; the only positional approximation is the
    bbox-centre of generalised polygons, and the sample is a blind 1-in-13 — no cherry-picking.

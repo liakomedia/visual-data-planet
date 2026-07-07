@@ -48,15 +48,44 @@ for(const [layer, where, geom] of [[0,'1=1',true],[1,`MOD(objectid,${MOD})=0`,tr
   }
   console.log();
 }
-const js=`/* Protected areas of Earth — uniform sample of the World Database on Protected Areas
-   (WDPA + points layer). Source: UNEP-WCMC and IUCN (2026), Protected Planet, queried via
-   the UNEP-WCMC ArcGIS REST service. NOT for redistribution — see protectedplanet.net terms.
-   Format: [lat, lon, iucnIdx, realmIdx, area_km2, year, isoIdx, desigIdx, name, flags(4=WHS,2=Ramsar,1=MAB)] */
+/* second Protected Planet database — WD-OECM (Other Effective area-based Conservation
+   Measures): the complete point + polygon layers (~7,500 sites). */
+const OECM_BASE='https://data-gis.unep-wcmc.org/server/rest/services/ProtectedSites/The_World_Database_on_other_effective_area_based_conservation_measures/MapServer';
+const oecm=[], OISO=[], ODESIG=[];
+async function oq(layer, offset){
+  const p=new URLSearchParams({where:'1=1', outFields:FIELDS, returnGeometry:'true',
+    outSR:'4326', maxAllowableOffset:'0.5', resultOffset:String(offset), resultRecordCount:'2000', f:'json'});
+  const r=await fetch(`${OECM_BASE}/${layer}/query`,{method:'POST',body:p}); return r.json();
+}
+for(const layer of [0,1]){
+  for(let off=0;;off+=2000){
+    const d=await oq(layer, off);
+    if(!d.features){ console.error('OECM ERR',JSON.stringify(d).slice(0,200)); break; }
+    d.features.forEach(f=>{ const a=f.attributes, ll=centroid(f.geometry);
+      if(!ll || !isFinite(ll[0])) return;
+      oecm.push([+ll[0].toFixed(2), +ll[1].toFixed(2), Math.max(0,IUCN.indexOf(a.iucn_cat)),
+        Math.max(0,REALM.indexOf(a.realm)), Math.round((a.rep_area||0)*10)/10, a.status_yr||0,
+        ix(OISO,a.iso3), ix(ODESIG,a.desig_eng), (a.name_eng||'').slice(0,60).replace(/"/g,"'")]); });
+    process.stdout.write(`OECM layer ${layer} @${off}: total ${oecm.length}\r`);
+    if(!d.exceededTransferLimit) break;
+  }
+  console.log();
+}
+const js=`/* Earth's protected & conserved areas — the two Protected Planet databases.
+   WDPA: uniform sample of the World Database on Protected Areas (polygon + point layers).
+   WD-OECM: the complete Other Effective area-based Conservation Measures layers.
+   Source: UNEP-WCMC and IUCN (2026), Protected Planet, via the UNEP-WCMC ArcGIS REST service.
+   NOT for redistribution — see protectedplanet.net terms.
+   PP row:   [lat, lon, iucnIdx, realmIdx, area_km2, year, isoIdx, desigIdx, name, flags(4=WHS,2=Ramsar,1=MAB)]
+   OECM row: [lat, lon, iucnIdx, realmIdx, area_km2, year, isoIdx, desigIdx, name] */
 const PP_IUCN=${JSON.stringify(IUCN)};
 const PP_REALM=${JSON.stringify(REALM)};
 const PP_ISO=${JSON.stringify(ISO)};
 const PP_DESIG=${JSON.stringify(DESIG)};
 const PP=${JSON.stringify(sites)};
+const PPO_ISO=${JSON.stringify(OISO)};
+const PPO_DESIG=${JSON.stringify(ODESIG)};
+const PP_OECM=${JSON.stringify(oecm)};
 `;
 await import('fs').then(fs=>fs.writeFileSync(out, js));
-console.log(`wrote ${out}: ${sites.length} sites, ${DESIG.length} designations, ${ISO.length} countries`);
+console.log(`wrote ${out}: ${sites.length} WDPA + ${oecm.length} OECM sites`);
