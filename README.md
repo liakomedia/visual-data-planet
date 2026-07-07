@@ -7,6 +7,7 @@
 [![OECMs](https://img.shields.io/badge/OECMs-7%2C524-ff9d5c?style=flat)](DATA.md)
 [![Fungal hotspots](https://img.shields.io/badge/fungal_hotspots-15%2C496_·_SPUN-ff7ab8?style=flat)](DATA.md)
 [![Maritime](https://img.shields.io/badge/maritime-bathymetry_·_boundaries-58a6ff?style=flat)](DATA.md)
+[![World data](https://img.shields.io/badge/world_data-climate·political·logistics·disasters·APIs-9ad0c2?style=flat)](DATA.md)
 [![Source](https://img.shields.io/badge/data-WDPA_·_Protected_Planet-2f6f4f?style=flat)](https://www.protectedplanet.net)
 [![Earth layers](https://img.shields.io/badge/earth_layers-16%2C179_cities_·_peaks_·_ports_·_seas-e8b45f?style=flat)](DATA.md)
 [![Build](https://img.shields.io/badge/build-none_·_vanilla_JS-3fb950?style=flat)](#running-locally)
@@ -49,6 +50,18 @@ of the ~315,000-site database:
   population), **7,461 mountain peaks ≥ 3,500 m** (Wikidata, brighter = higher),
   **1,081 ports** and **295 named oceans & seas** (Natural Earth label points) — each
   tappable with its own panel, searchable, and toggleable in the legend
+
+Additional open-data layers (all **off by default** — tick them on in the legend):
+
+- **Political** — country borders and capitals (Natural Earth)
+- **Logistics** — 5,276 large & medium airports (OurAirports)
+- **Disasters** — live M4.5+ earthquakes of the past 30 days (USGS) and open natural events
+  — wildfires, storms, volcanoes, floods (NASA EONET)
+- **Climate** — Köppen-Geiger climate zones (Beck et al. 2018)
+- **Population** — populated places weighted by inhabitants (Natural Earth)
+- **Public APIs** — 565 free public APIs from
+  [public-apis](https://github.com/public-apis/public-apis), placed at the geographic
+  location of the server that hosts each one, coloured by category (13 sections)
 
 The mapping methodology — coordinate maths, sampling, centroid handling, and what is exact
 versus approximate — is documented in [METHODS.md](METHODS.md); sources and citation in

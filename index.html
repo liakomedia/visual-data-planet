@@ -69,7 +69,7 @@
   <button id="cite-btn" title="Data sources & credits">✦ References</button>
   <div id="cite-body" hidden>
     <div class="cite-top">Compiled by <a href="https://liako.eu" target="_blank" rel="noopener"><b>Liako</b> — liako.eu ↗</a></div>
-    Protected areas: <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">UNEP-WCMC and IUCN (2026), Protected Planet: The World Database on Protected Areas (WDPA) ↗</a>,
+    Protected areas &amp; OECMs: <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">UNEP-WCMC and IUCN (2026), Protected Planet: The World Database on Protected Areas (WDPA) and on OECMs (WD-OECM) ↗</a>,
     Cambridge, UK — queried via the <a href="https://data-gis.unep-wcmc.org" target="_blank" rel="noopener">UNEP-WCMC map services ↗</a><br/>
     International designations shown: UNESCO World Heritage · Ramsar Convention wetlands · UNESCO-MAB biosphere reserves (as recorded in the WDPA)<br/>
     Cities, ports &amp; named seas: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth 10m (public domain) ↗</a><br/>
@@ -78,6 +78,9 @@
     Mycorrhizal-fungi hotspots: <a href="https://www.spun.earth" target="_blank" rel="noopener">SPUN Underground Atlas ↗</a> — Van Nuland et al. (2025), <a href="https://www.nature.com/articles/s41586-025-09277-4" target="_blank" rel="noopener">Nature ↗</a> (<a href="https://doi.org/10.5281/zenodo.14871588" target="_blank" rel="noopener">Zenodo, CC BY 4.0 ↗</a>)<br/>
     Earth imagery (surface, depth-shaded oceans): <a href="https://visibleearth.nasa.gov/collection/1484/blue-marble" target="_blank" rel="noopener">NASA Blue Marble: Next Generation — Topography &amp; Bathymetry (public domain) ↗</a><br/>
     Terrain &amp; seafloor relief: <a href="https://www.ncei.noaa.gov/products/etopo-global-relief-model" target="_blank" rel="noopener">NOAA NCEI ETOPO Global Relief (public domain) ↗</a><br/>
+    Airports: <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports (public domain) ↗</a> · Country borders &amp; capitals: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth (public domain) ↗</a><br/>
+    Earthquakes: <a href="https://earthquake.usgs.gov/earthquakes/feed/" target="_blank" rel="noopener">USGS ↗</a> · Natural events: <a href="https://eonet.gsfc.nasa.gov" target="_blank" rel="noopener">NASA EONET ↗</a> · Climate: <a href="https://doi.org/10.1038/sdata.2018.214" target="_blank" rel="noopener">Köppen-Geiger, Beck et al. 2018 (CC BY 4.0) ↗</a><br/>
+    Public APIs: <a href="https://github.com/public-apis/public-apis" target="_blank" rel="noopener">public-apis (MIT) ↗</a>, mapped by host-server geolocation (<a href="https://ip-api.com" target="_blank" rel="noopener">ip-api.com ↗</a>)<br/>
     Coverage statistics (17.6% land · 8.4% ocean): <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">Protected Planet ↗</a><br/>
     Source code — open source (MIT): <a href="https://github.com/liakomedia/visual-data-planet" target="_blank" rel="noopener"><b>github.com/liakomedia/visual-data-planet ↗</b></a>
   </div>
@@ -95,7 +98,9 @@ catch(e){ window.THREE=await import('https://cdn.jsdelivr.net/npm/three@0.183.0/
 <script src="includes/js/planet-earth.js?v=1"></script>
 <script src="includes/js/planet-maritime.js?v=1"></script>
 <script src="includes/js/planet-fungi.js?v=1"></script>
-<script src="includes/js/app.js?v=10"></script>
+<script src="includes/js/planet-world.js?v=1"></script>
+<script src="includes/js/planet-apis.js?v=1"></script>
+<script src="includes/js/app.js?v=12"></script>
 <script defer src="/track.js"></script>
 </body>
 </html>

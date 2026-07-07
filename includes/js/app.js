@@ -23,9 +23,9 @@ const GROUPS=[
   {key:'nr',  label:'category not reported',                      cats:[7,8,9], l:0.34},
 ];
 const SPECIALS=[
-  {key:'whs', label:'UNESCO World Heritage', flag:4, color:0xffd97a, size:3.2},
-  {key:'ram', label:'Ramsar wetlands',       flag:2, color:0x7fe0e8, size:2.4},
-  {key:'mab', label:'UNESCO-MAB biospheres', flag:1, color:0xb58ee7, size:2.4},
+  {key:'whs', label:'UNESCO World Heritage', flag:4, color:0xffd97a, size:4.6},
+  {key:'ram', label:'Ramsar wetlands',       flag:2, color:0x7fe0e8, size:3.4},
+  {key:'mab', label:'UNESCO-MAB biospheres', flag:1, color:0xb58ee7, size:3.4},
 ];
 
 let NODES=[{id:'earth',name:'Earth',x:0,y:0,z:0}];   // one pinned node — the globe itself
@@ -61,10 +61,10 @@ function buildClouds(){
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
     geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
-    const mat=new THREE.PointsMaterial({size:2.0, map:dot, vertexColors:true, transparent:true, opacity:0.85,
+    const mat=new THREE.PointsMaterial({size:3.0, map:dot, vertexColors:true, transparent:true, opacity:0.85,
       sizeAttenuation:false, depthWrite:false});
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
-    earthGroup.add(pts); _clouds.push({pts,label:gr.label,idxs});
+    earthGroup.add(pts); _clouds.push({pts,label:gr.label,idxs,grp:'pa',sw:'<span class="sw" style="background:hsl(120,55%,'+Math.round(gr.l*100)+'%)"></span>'});
   });
   // international designations — drawn on top, single colours
   SPECIALS.forEach(sp=>{
@@ -76,7 +76,7 @@ function buildClouds(){
     const mat=new THREE.PointsMaterial({size:sp.size, map:dot, color:sp.color, transparent:true, opacity:0.95,
       sizeAttenuation:false, depthWrite:false});
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
-    earthGroup.add(pts); _clouds.push({pts,label:sp.label,idxs});
+    earthGroup.add(pts); _clouds.push({pts,label:sp.label,idxs,grp:'pa',sw:'<span class="sw" style="background:#'+sp.color.toString(16).padStart(6,'0')+';border-radius:50%"></span>'});
   });
 }
 
@@ -88,16 +88,17 @@ function buildOECM(){
   PP_OECM.forEach((o,i)=>{ idxs.push(i); const v=llToVec(o[0],o[1],R*1.038); pos.push(v[0],v[1],v[2]); });
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  const mat=new THREE.PointsMaterial({size:2.4, map:dot, color:0xff9d5c, transparent:true, opacity:0.92,
+  const mat=new THREE.PointsMaterial({size:3.4, map:dot, color:0xff9d5c, transparent:true, opacity:0.92,
     sizeAttenuation:false, depthWrite:false});
   const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
-  earthGroup.add(pts); _clouds.push({pts,label:'OECM — other conservation measures',idxs,kind:'oecm',data:PP_OECM});
+  earthGroup.add(pts); _clouds.push({pts,label:'OECM — other conservation measures',idxs,kind:'oecm',data:PP_OECM,grp:'oecm',sw:'<span class="sw" style="background:#ff9d5c;border-radius:50%"></span>'});
 }
 
 /* physical & human geography — cities (Natural Earth), mountain peaks (Wikidata),
    ports and named oceans/seas (Natural Earth). Same picking/panel machinery. */
 function buildEarthLayers(){
   const dot=dotTexture();
+  const EARTH_SW={city:'#e8b45f',peak:'#e8dcc8',port:'#7fd8e8',sea:'#5f96e8'};
   const mk=(arr,kind,label,posR,colorFn,size,opacity)=>{
     const idxs=[],pos=[],col=[],c=new THREE.Color();
     arr.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],posR); pos.push(v[0],v[1],v[2]);
@@ -108,16 +109,16 @@ function buildEarthLayers(){
     const mat=new THREE.PointsMaterial({size, map:dot, vertexColors:true, transparent:true, opacity,
       sizeAttenuation:false, depthWrite:false});
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
-    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind,data:arr});
+    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind,data:arr,grp:'earth',sw:'<span class="sw" style="background:'+EARTH_SW[kind]+';border-radius:50%"></span>'});
   };
   if(typeof CITIES!=='undefined') mk(CITIES,'city','cities',R*1.033,
-    (c,it)=>c.setHSL(0.09,0.95,0.50+0.28*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),2.6,0.95);
+    (c,it)=>c.setHSL(0.09,0.95,0.50+0.28*Math.min(1,Math.log10(Math.max(1,it[2]))/7.4)),3.6,0.95);
   if(typeof PEAKS!=='undefined') mk(PEAKS,'peak','mountain peaks ≥ 3,500 m',R*1.045,
-    (c,it)=>c.setHSL(0.07,0.25,0.62+0.36*Math.min(1,(it[2]-3500)/5000)),2.4,0.95);
+    (c,it)=>c.setHSL(0.07,0.25,0.62+0.36*Math.min(1,(it[2]-3500)/5000)),3.4,0.95);
   if(typeof PORTS!=='undefined') mk(PORTS,'port','ports',R*1.033,
-    (c)=>c.set(0x8fe6f5),2.4,0.95);
+    (c)=>c.set(0x8fe6f5),3.4,0.95);
   if(typeof SEAS!=='undefined') mk(SEAS,'sea','oceans & seas (named)',R*1.055,
-    (c)=>c.set(0x6fa6f8),5.0,0.9);
+    (c)=>c.set(0x6fa6f8),6.5,0.9);
 }
 /* SPUN Underground Atlas — mycorrhizal fungal biodiversity hotspots (CC BY 4.0). */
 function buildFungi(){
@@ -126,9 +127,9 @@ function buildFungi(){
   const mk=(arr,label,color,ftype)=>{
     const idxs=[],pos=[]; arr.forEach((f,i)=>{ idxs.push(i); const v=llToVec(f[0],f[1],R*1.037); pos.push(v[0],v[1],v[2]); });
     const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-    const mat=new THREE.PointsMaterial({size:2.4, map:dot, color, transparent:true, opacity:0.85, sizeAttenuation:false, depthWrite:false});
+    const mat=new THREE.PointsMaterial({size:3.4, map:dot, color, transparent:true, opacity:0.85, sizeAttenuation:false, depthWrite:false});
     const pts=new THREE.Points(geo,mat); pts.frustumCulled=false;
-    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind:'fungi',data:arr,ftype});
+    earthGroup.add(pts); _clouds.push({pts,label,idxs,kind:'fungi',data:arr,ftype,grp:'fungi',sw:'<span class="sw" style="background:#'+color.toString(16).padStart(6,'0')+';border-radius:50%"></span>'});
   };
   mk(FUNGI.filter(f=>f[2]===0),'AM (arbuscular) richness hotspots',0xff7ab8,'Arbuscular mycorrhizal (AM)');
   mk(FUNGI.filter(f=>f[2]===1),'EcM (ecto) richness hotspots',0xc98cff,'Ectomycorrhizal (EcM)');
@@ -146,7 +147,7 @@ function addLine(segs, color, opacity, label, sw){
   const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(segs,3));
   const m=new THREE.LineBasicMaterial({color, transparent:true, opacity});
   const ls=new THREE.LineSegments(g,m); ls.frustumCulled=false;
-  earthGroup.add(ls); _lines.push({obj:ls,label,sw});
+  earthGroup.add(ls); _lines.push({obj:ls,label,grp:'maritime',sw:'<span class="sw" style="background:'+sw+'"></span>'});
 }
 function buildMaritime(){
   if(typeof BATHY!=='undefined') BATHY.forEach(b=>{ const col=depthColor(b.d);
@@ -158,6 +159,86 @@ function buildMaritime(){
 
 /* ETOPO combined relief: grey 0.5 = sea level, brighter = land, darker = ocean floor.
    displacementBias re-zeros sea level to R, so land rises and the sea floor sinks. */
+/* ---- extra world-data layers · all OFF by default, toggle in the legend ---- */
+let _dotShared=null; function dotShared(){ return _dotShared||(_dotShared=dotTexture()); }
+const API_SW=['#8fd3ff','#7ee0b8','#ffd166','#ff9e6d','#c3a6ff','#ff8fa3','#a0e57a','#e59bff','#7fc8ff','#ffb3de','#9ad0c2','#d4b483','#ffe08a'];
+const CLIM_G=[0xff5a4d,0xf2c14e,0x5ec26a,0x5a9bff,0xcfe8ff];   // Koppen A,B,C,D,E
+const CLIMG_NAMES=['Tropical (A)','Arid (B)','Temperate (C)','Continental (D)','Polar (E)'];
+function koppenGroup(k){ return k<=3?0 : k<=7?1 : k<=16?2 : k<=28?3 : 4; }
+function ptsHidden(pos, colorInt, size, opacity){
+  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  const mat=new THREE.PointsMaterial({size, map:dotShared(), color:colorInt, transparent:true, opacity, sizeAttenuation:false, depthWrite:false});
+  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; pts.visible=false; earthGroup.add(pts); return pts;
+}
+function ptsHiddenVC(pos, col, size, opacity){
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const mat=new THREE.PointsMaterial({size, map:dotShared(), vertexColors:true, transparent:true, opacity, sizeAttenuation:false, depthWrite:false});
+  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; pts.visible=false; earthGroup.add(pts); return pts;
+}
+function buildAPIs(){
+  if(typeof APIS==='undefined') return;
+  API_SECTIONS.forEach((sec,si)=>{
+    const idxs=[],pos=[]; APIS.forEach((a,i)=>{ if(a[2]!==si) return; idxs.push(i); const v=llToVec(a[0],a[1],R*1.036); pos.push(v[0],v[1],v[2]); });
+    if(!idxs.length) return;
+    const pts=ptsHidden(pos, parseInt(API_SW[si].slice(1),16), 3.0, 0.9);
+    _clouds.push({pts,label:sec,idxs,kind:'api',data:APIS,grp:'api',
+      sw:'<span class="sw" style="background:'+API_SW[si]+';border-radius:50%"></span>'});
+  });
+}
+function buildPopulation(){
+  if(typeof CITIES==='undefined') return;
+  const idxs=[],pos=[],col=[],c=new THREE.Color();
+  CITIES.forEach((it,i)=>{ idxs.push(i); const v=llToVec(it[0],it[1],R*1.035); pos.push(v[0],v[1],v[2]);
+    const t=Math.min(1,Math.log10(Math.max(1,it[2]))/7.3); c.setHSL(0.14-0.14*t,0.95,0.4+0.2*t); col.push(c.r,c.g,c.b); });
+  const pts=ptsHiddenVC(pos,col,3.4,0.9);
+  _clouds.push({pts,label:'population centres (by inhabitants)',idxs,kind:'pop',data:CITIES,grp:'population',
+    sw:'<span class="sw" style="background:#ff5a3c;border-radius:50%"></span>'});
+}
+function buildPolitical(){
+  if(typeof BORDERS!=='undefined'){ addLine(polysToSegments(BORDERS,R*1.006),0xffe6a8,0.5,'country borders','#ffe6a8');
+    const ln=_lines[_lines.length-1]; ln.grp='political'; ln.obj.visible=false; }
+  if(typeof CAPITALS!=='undefined'){
+    const idxs=[],pos=[]; CAPITALS.forEach((c,i)=>{ idxs.push(i); const v=llToVec(c[0],c[1],R*1.041); pos.push(v[0],v[1],v[2]); });
+    const pts=ptsHidden(pos,0xffd24a,4.2,0.95);
+    _clouds.push({pts,label:'capitals',idxs,kind:'capital',data:CAPITALS,grp:'political',
+      sw:'<span class="sw" style="background:#ffd24a;border-radius:50%"></span>'});
+  }
+}
+function buildLogistics(){
+  if(typeof AIRPORTS==='undefined') return;
+  const idxs=[],pos=[]; AIRPORTS.forEach((a,i)=>{ idxs.push(i); const v=llToVec(a[0],a[1],R*1.035); pos.push(v[0],v[1],v[2]); });
+  const pts=ptsHidden(pos,0x74e0ff,3.0,0.85);
+  _clouds.push({pts,label:'airports (large & medium)',idxs,kind:'airport',data:AIRPORTS,grp:'logistics',
+    sw:'<span class="sw" style="background:#74e0ff;border-radius:50%"></span>'});
+}
+function buildDisasters(){
+  if(typeof QUAKES!=='undefined'){
+    const idxs=[],pos=[],col=[],c=new THREE.Color();
+    QUAKES.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],R*1.038); pos.push(v[0],v[1],v[2]);
+      const t=Math.min(1,Math.max(0,(qk[2]-4)/4)); c.setHSL(0.12-0.12*t,0.95,0.55); col.push(c.r,c.g,c.b); });
+    const pts=ptsHiddenVC(pos,col,4.2,0.92);
+    _clouds.push({pts,label:'earthquakes M4.5+ · past 30 days',idxs,kind:'quake',data:QUAKES,grp:'disasters',
+      sw:'<span class="sw" style="background:#ff5a2c;border-radius:50%"></span>'});
+  }
+  if(typeof EONET!=='undefined'){
+    const idxs=[],pos=[]; EONET.forEach((e,i)=>{ idxs.push(i); const v=llToVec(e[0],e[1],R*1.042); pos.push(v[0],v[1],v[2]); });
+    const pts=ptsHidden(pos,0xffa640,4.2,0.95);
+    _clouds.push({pts,label:'natural events, open (NASA EONET)',idxs,kind:'eonet',data:EONET,grp:'disasters',
+      sw:'<span class="sw" style="background:#ffa640;border-radius:50%"></span>'});
+  }
+}
+function buildClimate(){
+  if(typeof CLIMATE==='undefined') return;
+  const idxs=[],pos=[],col=[],c=new THREE.Color();
+  CLIMATE.forEach((pt,i)=>{ idxs.push(i); const v=llToVec(pt[0],pt[1],R*1.031); pos.push(v[0],v[1],v[2]);
+    c.set(CLIM_G[koppenGroup(pt[2])]); col.push(c.r,c.g,c.b); });
+  const pts=ptsHiddenVC(pos,col,3.2,0.72);
+  _clouds.push({pts,label:'Koppen climate zones (A/B/C/D/E)',idxs,kind:'climate',data:CLIMATE,grp:'climate',
+    sw:'<span class="sw" style="background:linear-gradient(90deg,#ff5a4d,#5a9bff)"></span>'});
+}
+
 const DISP=R*0.05;              // full land+ocean vertical exaggeration (real relief is <0.3% of R)
 /* pick texture resolution to the GPU's limit — high-end desktops get the 16k surface,
    most get 8k, weak/mobile GPUs get 4k. Keeps deep zoom sharp without breaking low-end. */
@@ -189,6 +270,7 @@ function earthMesh(){
   buildEarthLayers();
   buildFungi();
   buildMaritime();
+  buildPopulation(); buildPolitical(); buildLogistics(); buildDisasters(); buildClimate(); buildAPIs();
   buildLegend(); updateHud();   // clouds exist only now — the graph calls this factory lazily
   return earthGroup;
 }
@@ -265,6 +347,27 @@ function showSite(hit){
         +(it[5]?row('Established',it[5]):'')
         +(typeof PPO_ISO!=='undefined'?row('Country / territory',(PPO_ISO[it[6]]||'—').split(';').join(' · ')):'');
     note='Other Effective area-based Conservation Measure — WD-OECM, UNEP-WCMC & IUCN, protectedplanet.net.'; }
+  else if(kind==='api'){ tag='Public API - '+(API_SECTIONS[it[2]]||''); col=API_SW[it[2]]||'#8fd3ff'; h2=it[3];
+    rows=row('Category',API_SECTIONS[it[2]]||'-')+row('Host',it[4])+row('Auth',it[5]||'No')+(it[6]?row('About',it[6]):'');
+    note='Server location of <a href="'+it[7]+'" target="_blank" rel="noopener" style="color:#8fd3ff">'+it[4]+' ↗</a> - list: public-apis (geolocation: ip-api.com).'; }
+  else if(kind==='capital'){ tag='Capital city'; col='#ffd24a'; h2=it[2]||'Capital';
+    rows=row('Country',it[3]||'-')+row('Population',it[4]?it[4].toLocaleString():'-');
+    note='National capital - Natural Earth (public domain).'; }
+  else if(kind==='airport'){ tag='Airport - '+(it[2]===2?'large':'medium'); col='#74e0ff'; h2=it[3]||'Airport';
+    rows=(it[4]?row('IATA',it[4]):'')+row('Country',it[5]||'-');
+    note='OurAirports (public domain).'; }
+  else if(kind==='quake'){ tag='Earthquake - USGS'; col='#ff5a2c'; h2='Magnitude '+it[2];
+    rows=row('Location',it[3]||'-')+row('Depth',it[4]+' km');
+    note='USGS - earthquakes M4.5+ over the past 30 days.'; }
+  else if(kind==='eonet'){ tag='Natural event - '+(EONET_CATS[it[2]]||''); col='#ffa640'; h2=it[3]||'Event';
+    rows=row('Category',EONET_CATS[it[2]]||'-');
+    note='Open natural event - NASA EONET (Earth Observatory Natural Event Tracker).'; }
+  else if(kind==='climate'){ tag='Climate - Koppen-Geiger'; col='#5ec26a'; h2=(KOPPEN[it[2]]||'')+' - '+CLIMG_NAMES[koppenGroup(it[2])];
+    rows=row('Koppen class',KOPPEN[it[2]]||'-')+row('Group',CLIMG_NAMES[koppenGroup(it[2])]);
+    note='Koppen-Geiger present-day climate - Beck et al. (2018), Nature Scientific Data (CC BY 4.0).'; }
+  else if(kind==='pop'){ tag='Population'; col='#ff5a3c'; h2=it[3]||'Place';
+    rows=row('Country',it[4]||'-')+row('Population (urban area)',it[2]?it[2].toLocaleString():'-');
+    note='Populated place with reported population - Natural Earth (public domain).'; }
   else { tag='Ocean / sea · Natural Earth'; col='#5f96e8'; h2=it[2]||'Sea';
     rows=row('Type',(it[3]||'sea').replace(/_/g,' '));
     note='Named marine region — dot marks the label point of its main basin (Natural Earth, public domain).'; }
@@ -318,11 +421,14 @@ function easeCam(toPos,toTarget,ms){
   cancelAnimationFrame(_camAnim); _camAnim=requestAnimationFrame(run);
 }
 function flyToLL(lat,lon){
+  _spin=false;                                    // stop the globe so the target stays framed
+  const sb=document.getElementById('bSpin'); if(sb) sb.classList.remove('active');
   const v=llToVec(lat,lon,1);
-  // account for the globe's current rotation
+  // account for the globe's current rotation → world direction of the target point
   const rot=earthGroup.rotation.y, cos=Math.cos(rot), sin=Math.sin(rot);
-  const x=v[0]*cos+v[2]*sin, z=-v[0]*sin+v[2]*cos;
-  easeCam({x:x*R*2.2, y:v[1]*R*2.2, z:z*R*2.2},{x:0,y:0,z:0},900);
+  const x=v[0]*cos+v[2]*sin, y=v[1], z=-v[0]*sin+v[2]*cos;
+  // zoom right in: camera just outside the point, looking AT the point (not the globe centre)
+  easeCam({x:x*R*1.55, y:y*R*1.55, z:z*R*1.55}, {x:x*R, y:y*R, z:z*R}, 950);
 }
 document.getElementById('bAll').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
 document.getElementById('bFit').onclick=()=>easeCam({x:0,y:R*0.7,z:R*2.6},{x:0,y:0,z:0},700);
@@ -344,38 +450,30 @@ function mkToggle(el, html, isOn, onToggle){
 }
 function buildLegend(){
   const el=document.getElementById('legend');
-  el.innerHTML='<b>PROTECTED-AREA LAYERS · click to hide / show</b>';
-  el.insertAdjacentHTML('afterbegin',
-    '<label class="lg" style="width:100%;cursor:pointer;user-select:none;margin-bottom:2px;color:#eaf0ff">'+
-    '<input type="checkbox" id="legend-all" checked style="accent-color:#8fe3a8;margin:0 7px 0 0;cursor:pointer;vertical-align:-2px">select / unselect all</label>');
+  el.innerHTML='<label class="lg" style="width:100%;cursor:pointer;user-select:none;margin-bottom:2px;color:#eaf0ff">'+
+    '<input type="checkbox" id="legend-all" checked style="accent-color:#8fe3a8;margin:0 7px 0 0;cursor:pointer;vertical-align:-2px">select / unselect all</label>';
   document.getElementById('legend-all').onchange=e=>{ const on=e.target.checked;
     _legendChips.forEach(c=>{ if(c.toggle && c.isOn()!==on) c.toggle(); });
     refreshLegendChips(); _syncLegendMaster(); };
-  const EARTH_SW={city:'#e8b45f',peak:'#e8dcc8',port:'#7fd8e8',sea:'#5f96e8'};
-  const FUNGI_SW={0:'#ff7ab8',1:'#c98cff'};
-  let earthHeadDone=false, oecmHeadDone=false, fungiHeadDone=false, fi=0;
-  _clouds.forEach((cl,ci)=>{
-    let sw;
-    if(cl.kind==='oecm'){ if(!oecmHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">OTHER CONSERVATION (WD-OECM) · click to hide / show</b>'); oecmHeadDone=true; }
-      sw='<span class="sw" style="background:#ff9d5c;border-radius:50%"></span>'; }
-    else if(cl.kind==='fungi'){ if(!fungiHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">FUNGAL BIODIVERSITY (SPUN) · click to hide / show</b>'); fungiHeadDone=true; }
-      sw=`<span class="sw" style="background:${FUNGI_SW[fi++]};border-radius:50%"></span>`; }
-    else if(cl.kind){ if(!earthHeadDone){ el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">EARTH LAYERS · click to hide / show</b>'); earthHeadDone=true; }
-      sw=`<span class="sw" style="background:${EARTH_SW[cl.kind]};border-radius:50%"></span>`; }
-    else sw = ci<GROUPS.length
-      ? `<span class="sw" style="background:hsl(120,55%,${Math.round(GROUPS[ci].l*100)}%)"></span>`
-      : `<span class="sw" style="background:#${SPECIALS[ci-GROUPS.length].color.toString(16)};border-radius:50%"></span>`;
-    mkToggle(el, sw+cl.label+` <span style="color:#8ea3cf">${cl.idxs.length.toLocaleString()}</span>`,
-      ()=>cl.pts.visible, ()=>{ cl.pts.visible=!cl.pts.visible; });
+  const ORDER=['pa','oecm','fungi','population','earth','political','logistics','disasters','climate','api','maritime'];
+  const HEAD={pa:'PROTECTED-AREA LAYERS', oecm:'OTHER CONSERVATION (WD-OECM)', fungi:'FUNGAL BIODIVERSITY (SPUN)',
+    population:'POPULATION', earth:'EARTH LAYERS', political:'POLITICAL — borders &amp; capitals',
+    logistics:'LOGISTICS — airports', disasters:'DISASTERS — live', climate:'CLIMATE — Köppen-Geiger',
+    api:'PUBLIC APIs — by host server location', maritime:'OCEANS &amp; MARITIME CARTOGRAPHY'};
+  const items=[];
+  _clouds.forEach(cl=>items.push({grp:cl.grp||'earth', sw:cl.sw||'', label:cl.label,
+    count:cl.idxs?cl.idxs.length:0, isOn:()=>cl.pts.visible, tog:()=>{cl.pts.visible=!cl.pts.visible;}}));
+  _lines.forEach(ln=>items.push({grp:ln.grp||'maritime', sw:ln.sw||'', label:ln.label,
+    count:0, isOn:()=>ln.obj.visible, tog:()=>{ln.obj.visible=!ln.obj.visible;}}));
+  items.sort((a,b)=>(ORDER.indexOf(a.grp)-ORDER.indexOf(b.grp)));
+  let cur=null;
+  items.forEach(it=>{ if(it.grp!==cur){ cur=it.grp;
+      el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">'+(HEAD[it.grp]||it.grp)+' · click to hide / show</b>'); }
+    const cnt=it.count?` <span style="color:#8ea3cf">${it.count.toLocaleString()}</span>`:'';
+    mkToggle(el, it.sw+it.label+cnt, it.isOn, it.tog);
   });
-  if(_lines.length){
-    el.insertAdjacentHTML('beforeend','<b style="margin-top:6px">OCEANS &amp; MARITIME CARTOGRAPHY · click to hide / show</b>');
-    _lines.forEach(ln=>{
-      const sw=`<span class="sw" style="background:${ln.sw}"></span>`;
-      mkToggle(el, sw+ln.label, ()=>ln.obj.visible, ()=>{ ln.obj.visible=!ln.obj.visible; });
-    });
-  }
-  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">greens = land &amp; coast · blues = marine · isobaths deepen with depth · one dot = one record</span>');
+  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">many layers are off by default — tick them on above · one dot = one record</span>');
+  _syncLegendMaster();
 }
 function updateHud(){
   const nF=(typeof FUNGI!=='undefined')?FUNGI.length.toLocaleString():0;
@@ -388,6 +486,9 @@ function updateHud(){
 const q=document.getElementById('q');
 let _searchHits=[], _searchN=0;
 function searchSources(){ const src=[{arr:PP,n:8,kind:'pp'}];
+  if(typeof APIS!=='undefined') src.push({arr:APIS,n:3,kind:'api'});
+  if(typeof CAPITALS!=='undefined') src.push({arr:CAPITALS,n:2,kind:'capital'});
+  if(typeof AIRPORTS!=='undefined') src.push({arr:AIRPORTS,n:3,kind:'airport'});
   if(typeof PP_OECM!=='undefined') src.push({arr:PP_OECM,n:8,kind:'oecm'});
   if(typeof CITIES!=='undefined') src.push({arr:CITIES,n:3,kind:'city'});
   if(typeof PEAKS!=='undefined') src.push({arr:PEAKS,n:3,kind:'peak'});
