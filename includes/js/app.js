@@ -168,14 +168,14 @@ function koppenGroup(k){ return k<=3?0 : k<=7?1 : k<=16?2 : k<=28?3 : 4; }
 function ptsHidden(pos, colorInt, size, opacity){
   const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   const mat=new THREE.PointsMaterial({size, map:dotShared(), color:colorInt, transparent:true, opacity, sizeAttenuation:false, depthWrite:false});
-  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; pts.visible=false; earthGroup.add(pts); return pts;
+  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; earthGroup.add(pts); return pts;
 }
 function ptsHiddenVC(pos, col, size, opacity){
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
   const mat=new THREE.PointsMaterial({size, map:dotShared(), vertexColors:true, transparent:true, opacity, sizeAttenuation:false, depthWrite:false});
-  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; pts.visible=false; earthGroup.add(pts); return pts;
+  const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; earthGroup.add(pts); return pts;
 }
 function buildAPIs(){
   if(typeof APIS==='undefined') return;
@@ -198,7 +198,7 @@ function buildPopulation(){
 }
 function buildPolitical(){
   if(typeof BORDERS!=='undefined'){ addLine(polysToSegments(BORDERS,R*1.006),0xffe6a8,0.5,'country borders','#ffe6a8');
-    const ln=_lines[_lines.length-1]; ln.grp='political'; ln.obj.visible=false; }
+    const ln=_lines[_lines.length-1]; ln.grp='political'; }
   if(typeof CAPITALS!=='undefined'){
     const idxs=[],pos=[]; CAPITALS.forEach((c,i)=>{ idxs.push(i); const v=llToVec(c[0],c[1],R*1.041); pos.push(v[0],v[1],v[2]); });
     const pts=ptsHidden(pos,0xffd24a,4.2,0.95);
@@ -219,7 +219,7 @@ function buildDisasters(){
     QUAKES.forEach((qk,i)=>{ idxs.push(i); const v=llToVec(qk[0],qk[1],R*1.038); pos.push(v[0],v[1],v[2]);
       const t=Math.min(1,Math.max(0,(qk[2]-4)/4)); c.setHSL(0.12-0.12*t,0.95,0.55); col.push(c.r,c.g,c.b); });
     const pts=ptsHiddenVC(pos,col,4.2,0.92);
-    _clouds.push({pts,label:'earthquakes M4.5+ · past 30 days',idxs,kind:'quake',data:QUAKES,grp:'disasters',
+    _clouds.push({pts,label:'earthquakes M4.5+ · recent',idxs,kind:'quake',data:QUAKES,grp:'disasters',
       sw:'<span class="sw" style="background:#ff5a2c;border-radius:50%"></span>'});
   }
   if(typeof QUAKES_HIST!=='undefined'){
@@ -365,11 +365,11 @@ function showSite(hit){
     rows=(it[4]?row('IATA',it[4]):'')+row('Country',it[5]||'-');
     note='OurAirports (public domain).'; }
   else if(kind==='quake'){ tag='Earthquake - USGS'; col='#ff5a2c'; h2='Magnitude '+it[2];
-    rows=row('Location',it[3]||'-')+row('Depth',it[4]+' km');
-    note='USGS - earthquakes M4.5+ over the past 30 days.'; }
+    rows=row('Date',it[5]||'-')+row('Location',it[3]||'-')+row('Depth',it[4]+' km');
+    note='Recorded earthquake, magnitude 4.5+ - USGS.'; }
   else if(kind==='quakeh'){ tag='Earthquake - USGS'; col='#ffb03a'; h2='Magnitude '+it[2];
-    rows=row('Year',it[3])+row('Depth',it[4]+' km');
-    note='USGS - M5.0+ earthquakes since 2000. Colour = magnitude.'; }
+    rows=row('Date',it[3]||'-')+row('Depth',it[4]+' km');
+    note='Earthquake magnitude 5.0+ since 2000 - USGS. Colour = magnitude.'; }
   else if(kind==='eonet'){ tag='Natural event - '+(EONET_CATS[it[2]]||''); col='#ffa640'; h2=it[3]||'Event';
     rows=row('Category',EONET_CATS[it[2]]||'-');
     note='Open natural event - NASA EONET (Earth Observatory Natural Event Tracker).'; }
@@ -483,7 +483,7 @@ function buildLegend(){
     const cnt=it.count?` <span style="color:#8ea3cf">${it.count.toLocaleString()}</span>`:'';
     mkToggle(el, it.sw+it.label+cnt, it.isOn, it.tog);
   });
-  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">many layers are off by default — tick them on above · one dot = one record</span>');
+  el.insertAdjacentHTML('beforeend','<span class="lg" style="width:100%;margin-top:4px;color:#cbd6ff">tick any layer above to show / hide it · one dot = one record</span>');
   _syncLegendMaster();
 }
 function updateHud(){

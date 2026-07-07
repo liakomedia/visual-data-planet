@@ -15,6 +15,8 @@ def get(u, t=120):
     return urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'LiakoVisualData/1.0'}), timeout=t).read()
 r1 = lambda x: round(x, 1)
 r2 = lambda x: round(x, 2)
+import datetime
+def dstr(ms): return datetime.datetime.utcfromtimestamp((ms or 0)/1000).strftime('%Y-%m-%d')
 NE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/'
 
 def rings(g):
@@ -57,9 +59,8 @@ q = json.loads(get('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.
 QUAKES = []
 for f in q['features']:
     c = f['geometry']['coordinates']; pr = f['properties']
-    QUAKES.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), (pr.get('place') or '')[:50], round(c[2] or 0)])
+    QUAKES.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), (pr.get('place') or '')[:50], round(c[2] or 0), dstr(pr.get('time'))])
 # historical: all M5.0+ since 2000 (FDSN caps 20k/request → paginate by offset)
-import datetime
 QUAKES_HIST, off = [], 1
 while True:
     d = json.loads(get('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson'
@@ -68,8 +69,7 @@ while True:
     for f in feats:
         c = f['geometry']['coordinates']; pr = f['properties']
         if c[0] is None or c[1] is None: continue
-        yr = datetime.datetime.utcfromtimestamp((pr.get('time') or 0) / 1000).year
-        QUAKES_HIST.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), yr, round(c[2] or 0)])
+        QUAKES_HIST.append([r2(c[1]), r2(c[0]), round(pr.get('mag') or 0, 1), dstr(pr.get('time')), round(c[2] or 0)])
     if len(feats) < 20000: break
     off += 20000
 ECAT = ['Wildfires', 'Severe Storms', 'Volcanoes', 'Sea and Lake Ice', 'Floods', 'Earthquakes', 'Drought',
