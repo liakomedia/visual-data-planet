@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+node_modules/
+*.log
+# WDPA terms prohibit redistribution — regenerate with scripts/fetch-wdpa.mjs
+includes/js/planet-data.js

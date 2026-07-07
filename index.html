@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#05070e"/>
+<title>Visual Data Planet — Earth's Protected Areas in 3D</title>
+<meta name="description" content="Every protected area on Earth in one interactive 3D globe — 31,000+ national parks, reserves, marine protected areas, World Heritage sites, Ramsar wetlands and biospheres from the World Database on Protected Areas (WDPA), each with its real data."/>
+<link rel="canonical" href="https://vdata.liako.eu/planet/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Visual Data by Liako"/>
+<meta property="og:url" content="https://vdata.liako.eu/planet/"/>
+<meta property="og:title" content="Visual Data Planet — Earth's Protected Areas in 3D"/>
+<meta property="og:description" content="31,000+ protected areas — national parks, marine reserves, World Heritage sites, Ramsar wetlands — on one interactive 3D globe, from the World Database on Protected Areas."/>
+<meta property="og:image" content="https://vdata.liako.eu/og/planet.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="3D globe of Earth's protected areas"/>
+<meta property="og:locale" content="en_US"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Visual Data Planet — Earth's Protected Areas in 3D"/>
+<meta name="twitter:description" content="31,000+ protected areas on one interactive 3D globe — from the World Database on Protected Areas (WDPA)."/>
+<meta name="twitter:image" content="https://vdata.liako.eu/og/planet.jpg"/>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"WebApplication","@id":"https://vdata.liako.eu/planet/#app","name":"Visual Data Planet","url":"https://vdata.liako.eu/planet/","description":"Interactive 3D globe of Earth's protected areas — 31,000+ sites sampled from the World Database on Protected Areas (WDPA): national parks, strict reserves, marine protected areas, UNESCO World Heritage sites, Ramsar wetlands and MAB biospheres, each with its designation, IUCN category, area and country.","applicationCategory":"EducationalApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and WebGL","isAccessibleForFree":true,"inLanguage":"en","image":"https://vdata.liako.eu/og/planet.jpg","creator":{"@id":"https://liako.eu/#organization"},"publisher":{"@id":"https://liako.eu/#organization"},"isPartOf":{"@id":"https://vdata.liako.eu/#website"},"about":[{"@type":"Thing","name":"Protected area","sameAs":"https://en.wikipedia.org/wiki/Protected_area"},{"@type":"Thing","name":"Nature conservation","sameAs":"https://en.wikipedia.org/wiki/Nature_conservation"}]},
+ {"@type":"BreadcrumbList","@id":"https://vdata.liako.eu/planet/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Visual Data","item":"https://vdata.liako.eu/"},{"@type":"ListItem","position":2,"name":"Planet","item":"https://vdata.liako.eu/planet/"}]},
+ {"@type":"WebSite","@id":"https://vdata.liako.eu/#website","name":"Visual Data by Liako","url":"https://vdata.liako.eu/","publisher":{"@id":"https://liako.eu/#organization"}},
+ {"@type":"Organization","@id":"https://liako.eu/#organization","name":"Liako","url":"https://liako.eu/"}
+]}
+</script>
+<link rel="icon" href="/icons/liako-32x32.png" sizes="32x32"/>
+<link rel="icon" href="/icons/liako-192x192.png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="/icons/liako-180x180.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="includes/css/style.css?v=1"/>
+</head>
+<body>
+<div id="graph"></div>
+<div id="loading">Charting the planet…</div>
+
+<header>
+  <div class="brand">
+    <h1>Visual Data <span class="d">Planet</span></h1>
+    <div class="sub">Earth's protected areas — every dot a real national park, reserve or marine sanctuary from the WDPA.</div>
+  </div>
+  <div id="controls">
+    <button id="bAll" title="Zoom back out to the whole planet">Overview</button>
+    <button id="bFit" title="Frame the whole planet">Fit view</button>
+    <button id="bReset" title="Return to the start view and show all layers">Reset</button>
+    <button id="bSpin" class="active" title="Pause / resume the globe's rotation">⟳ Spin</button>
+  </div>
+  <div id="search"><input id="q" type="search" placeholder="Search a park, reserve, site… (Enter cycles matches)" autocomplete="off"/></div>
+</header>
+<div id="crumbs"></div>
+
+<div id="panel">
+  <div class="close" id="pclose">×</div>
+  <div class="ph" id="pph"></div>
+  <div class="bd" id="pbd"></div>
+</div>
+
+<button id="legend-btn" title="Protected-area layers — show / hide">◈ Legend</button>
+<div id="legend"></div>
+<div id="hud"></div>
+<div id="cite">
+  <button id="cite-btn" title="Data sources & credits">✦ References</button>
+  <div id="cite-body" hidden>
+    <div class="cite-top">Compiled by <a href="https://liako.eu" target="_blank" rel="noopener"><b>Liako</b> — liako.eu ↗</a></div>
+    Protected areas: <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">UNEP-WCMC and IUCN (2026), Protected Planet: The World Database on Protected Areas (WDPA) ↗</a>,
+    Cambridge, UK — queried via the <a href="https://data-gis.unep-wcmc.org" target="_blank" rel="noopener">UNEP-WCMC map services ↗</a><br/>
+    International designations shown: UNESCO World Heritage · Ramsar Convention wetlands · UNESCO-MAB biosphere reserves (as recorded in the WDPA)<br/>
+    Earth imagery: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope (CC BY 4.0) ↗</a><br/>
+    Coverage statistics (17.6% land · 8.4% ocean): <a href="https://www.protectedplanet.net" target="_blank" rel="noopener">Protected Planet ↗</a><br/>
+    Source code — open source (MIT): <a href="https://github.com/liakomedia/visual-data-planet" target="_blank" rel="noopener"><b>github.com/liakomedia/visual-data-planet ↗</b></a>
+  </div>
+</div>
+
+<script src="https://unpkg.com/3d-force-graph@1.80.0"></script>
+<script>if(typeof ForceGraph3D==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.80.0"><\/script>');}</script>
+<!-- global THREE must match the revision bundled inside 3d-force-graph (r183) — a version
+     mismatch makes textures upload but sample BLACK. app.js boot() polls until this lands. -->
+<script type="module">
+try{ window.THREE=await import('https://unpkg.com/three@0.183.0/build/three.module.js'); }
+catch(e){ window.THREE=await import('https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js'); }
+</script>
+<script src="includes/js/planet-data.js?v=3"></script>
+<script src="includes/js/app.js?v=2"></script>
+<script defer src="/track.js"></script>
+</body>
+</html>
